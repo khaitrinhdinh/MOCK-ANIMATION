@@ -1,8 +1,12 @@
 # MOCK-ANIMATION
 
-Loading-screen animation concepts for the "Music Seed" flow — a seed is planted, grows, blooms, and releases a music drop when the song is ready.
+Loading-screen design concepts for the song-generation flow, built with **pure SVG + CSS** — zero dependencies, each demo is one self-contained HTML file.
 
-**4 design variations** (Classic 🌼 · Raindrop 🌧️ · Firefly ✨ · Bonsai 🌳), 3 animation phases each, built with **pure SVG + CSS** — zero dependencies, single self-contained `index.html` (~60 KB including the embedded Noto Sans JP font).
+## Structure
+
+- `index.html` — gallery: pick a design concept
+- `design-1.html` — **Design 01 · Music Seed Garden**: a seed is planted, grows and blooms, then your song falls as a golden music drop. 4 variations (Classic 🌼 · Raindrop 🌧️ · Firefly ✨ · Bonsai 🌳), 3 animation phases each.
+- Design 02 — coming soon
 
 ## Run
 
