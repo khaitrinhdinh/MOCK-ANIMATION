@@ -87,7 +87,7 @@
   .stage svg { display: block; width: 100%; height: auto; position: relative; z-index: 1; }
   .stage canvas, #grain { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
   #fxbg { z-index: 0; }
-  #fxfg { z-index: 2; }
+  #fxfg { z-index: 2; mix-blend-mode: screen; }
   #grain { z-index: 3; opacity: .07; mix-blend-mode: soft-light; background-repeat: repeat; }
 
   /* ambient life: every hero object floats, flickers and pulses at once */
@@ -400,7 +400,9 @@
             <ellipse class="halo" cx="150" cy="198" rx="34" ry="30" fill="url(#g2halo)"/>
             <g class="floaty"><g class="flick"><g class="seed-body glow-strong">
               <path d="M150 180 C158 190 161 197 161 203 A11 11 0 1 1 139 203 C139 197 142 190 150 180 Z"
-                    fill="rgba(245,143,34,.08)" stroke="url(#g2seed)" stroke-width="1.8"/>
+                    fill="none" stroke="#F58F22" stroke-opacity=".22" stroke-width="5.5"/>
+              <path d="M150 180 C158 190 161 197 161 203 A11 11 0 1 1 139 203 C139 197 142 190 150 180 Z"
+                    fill="rgba(245,143,34,.08)" stroke="url(#g2seed)" stroke-width="1.6"/>
               <path d="M150 209 C150 202 150 196 150 191" fill="none" stroke="#FFBB57" stroke-width="1.2" stroke-linecap="round"/>
               <path d="M150 196 C147 194 145 191 145 188 C148 189 150 192 150 196 Z" fill="none" stroke="#FFBB57" stroke-width="1"/>
               <path d="M150 196 C153 194 155 191 155 188 C152 189 150 192 150 196 Z" fill="none" stroke="#FFBB57" stroke-width="1"/>
@@ -412,9 +414,12 @@
             <path class="pop2" d="M150 192 C178 178 190 152 188 122 C160 136 149 164 150 192 Z" fill="rgba(245,143,34,.06)" style="--d:1.65s;--o:50% 100%"/>
 
             <!-- main stem + side stems -->
-            <path class="stem glow-soft" d="M150 196 C152 172 146 152 150 124" fill="none" stroke="url(#g2acc)" stroke-width="2.2" stroke-linecap="round"/>
-            <path class="stem" style="stroke-dasharray:36;stroke-dashoffset:36;--sd:.7s" d="M150 176 C140 170 132 162 128 150" fill="none" stroke="#F58F22" stroke-width="1.6" stroke-linecap="round"/>
-            <path class="stem" style="stroke-dasharray:34;stroke-dashoffset:34;--sd:.9s" d="M150 158 C160 152 168 144 171 133" fill="none" stroke="#F58F22" stroke-width="1.6" stroke-linecap="round"/>
+            <path class="stem" d="M150 196 C152 172 146 152 150 124" fill="none" stroke="#F58F22" stroke-opacity=".2" stroke-width="6" stroke-linecap="round"/>
+            <path class="stem glow-soft" d="M150 196 C152 172 146 152 150 124" fill="none" stroke="url(#g2acc)" stroke-width="1.5" stroke-linecap="round"/>
+            <path class="stem" style="stroke-dasharray:36;stroke-dashoffset:36;--sd:.7s" d="M150 176 C140 170 132 162 128 150" fill="none" stroke="#F58F22" stroke-opacity=".18" stroke-width="4" stroke-linecap="round"/>
+            <path class="stem" style="stroke-dasharray:36;stroke-dashoffset:36;--sd:.7s" d="M150 176 C140 170 132 162 128 150" fill="none" stroke="#FFD9A0" stroke-width="1.1" stroke-linecap="round"/>
+            <path class="stem" style="stroke-dasharray:34;stroke-dashoffset:34;--sd:.9s" d="M150 158 C160 152 168 144 171 133" fill="none" stroke="#F58F22" stroke-opacity=".18" stroke-width="4" stroke-linecap="round"/>
+            <path class="stem" style="stroke-dasharray:34;stroke-dashoffset:34;--sd:.9s" d="M150 158 C160 152 168 144 171 133" fill="none" stroke="#FFD9A0" stroke-width="1.1" stroke-linecap="round"/>
 
             <!-- leaves with veins: two pairs on the main stem -->
             <g transform="translate(149 182)"><g class="leaf-in glow-soft" style="--d:.85s">
@@ -456,12 +461,12 @@
 
             <!-- triple-layer lotus -->
             <g class="floaty2"><g transform="translate(150 122)">
-              <g transform="rotate(0)"><ellipse class="petal-e glow-soft" cx="0" cy="-16" rx="9.5" ry="16" fill="rgba(245,143,34,.12)" stroke="#F58F22" stroke-width="1.3" style="--d:.05s"/></g>
-              <g transform="rotate(60)"><ellipse class="petal-e glow-soft" cx="0" cy="-16" rx="9.5" ry="16" fill="rgba(245,143,34,.12)" stroke="#F58F22" stroke-width="1.3" style="--d:.14s"/></g>
-              <g transform="rotate(120)"><ellipse class="petal-e glow-soft" cx="0" cy="-16" rx="9.5" ry="16" fill="rgba(245,143,34,.12)" stroke="#F58F22" stroke-width="1.3" style="--d:.23s"/></g>
-              <g transform="rotate(180)"><ellipse class="petal-e glow-soft" cx="0" cy="-16" rx="9.5" ry="16" fill="rgba(245,143,34,.12)" stroke="#F58F22" stroke-width="1.3" style="--d:.32s"/></g>
-              <g transform="rotate(240)"><ellipse class="petal-e glow-soft" cx="0" cy="-16" rx="9.5" ry="16" fill="rgba(245,143,34,.12)" stroke="#F58F22" stroke-width="1.3" style="--d:.41s"/></g>
-              <g transform="rotate(300)"><ellipse class="petal-e glow-soft" cx="0" cy="-16" rx="9.5" ry="16" fill="rgba(245,143,34,.12)" stroke="#F58F22" stroke-width="1.3" style="--d:.5s"/></g>
+              <g transform="rotate(0)"><ellipse class="petal-e glow-soft" cx="0" cy="-16" rx="9.5" ry="16" fill="rgba(245,143,34,.12)" stroke="url(#g2seed)" stroke-width="1.3" style="--d:.05s"/></g>
+              <g transform="rotate(60)"><ellipse class="petal-e glow-soft" cx="0" cy="-16" rx="9.5" ry="16" fill="rgba(245,143,34,.12)" stroke="url(#g2seed)" stroke-width="1.3" style="--d:.14s"/></g>
+              <g transform="rotate(120)"><ellipse class="petal-e glow-soft" cx="0" cy="-16" rx="9.5" ry="16" fill="rgba(245,143,34,.12)" stroke="url(#g2seed)" stroke-width="1.3" style="--d:.23s"/></g>
+              <g transform="rotate(180)"><ellipse class="petal-e glow-soft" cx="0" cy="-16" rx="9.5" ry="16" fill="rgba(245,143,34,.12)" stroke="url(#g2seed)" stroke-width="1.3" style="--d:.32s"/></g>
+              <g transform="rotate(240)"><ellipse class="petal-e glow-soft" cx="0" cy="-16" rx="9.5" ry="16" fill="rgba(245,143,34,.12)" stroke="url(#g2seed)" stroke-width="1.3" style="--d:.41s"/></g>
+              <g transform="rotate(300)"><ellipse class="petal-e glow-soft" cx="0" cy="-16" rx="9.5" ry="16" fill="rgba(245,143,34,.12)" stroke="url(#g2seed)" stroke-width="1.3" style="--d:.5s"/></g>
               <g transform="rotate(30)"><ellipse class="petal-e" cx="0" cy="-11.5" rx="6.5" ry="11.5" fill="rgba(255,187,87,.2)" stroke="#FFBB57" stroke-width="1.1" style="--d:.48s"/></g>
               <g transform="rotate(90)"><ellipse class="petal-e" cx="0" cy="-11.5" rx="6.5" ry="11.5" fill="rgba(255,187,87,.2)" stroke="#FFBB57" stroke-width="1.1" style="--d:.55s"/></g>
               <g transform="rotate(150)"><ellipse class="petal-e" cx="0" cy="-11.5" rx="6.5" ry="11.5" fill="rgba(255,187,87,.2)" stroke="#FFBB57" stroke-width="1.1" style="--d:.62s"/></g>
@@ -472,6 +477,14 @@
               <g transform="rotate(135)"><ellipse class="petal-e" cx="0" cy="-7" rx="4.2" ry="7" fill="rgba(255,227,189,.28)" stroke="#ffe3bd" stroke-width=".9" style="--d:.84s"/></g>
               <g transform="rotate(225)"><ellipse class="petal-e" cx="0" cy="-7" rx="4.2" ry="7" fill="rgba(255,227,189,.28)" stroke="#ffe3bd" stroke-width=".9" style="--d:.9s"/></g>
               <g transform="rotate(315)"><ellipse class="petal-e" cx="0" cy="-7" rx="4.2" ry="7" fill="rgba(255,227,189,.28)" stroke="#ffe3bd" stroke-width=".9" style="--d:.96s"/></g>
+              <g class="pop3" style="--d:1.05s" fill="#fff">
+                <circle cx="0" cy="-31" r="1" opacity=".9"/>
+                <circle cx="26.8" cy="-15.5" r="1" opacity=".75"/>
+                <circle cx="26.8" cy="15.5" r="1" opacity=".75"/>
+                <circle cx="0" cy="31" r="1" opacity=".9"/>
+                <circle cx="-26.8" cy="15.5" r="1" opacity=".75"/>
+                <circle cx="-26.8" cy="-15.5" r="1" opacity=".75"/>
+              </g>
               <circle class="fcenter glow-strong" r="6" fill="url(#g2seed)"/>
               <circle class="fcenter" r="9.5" fill="none" stroke="#FFBB57" stroke-width=".8" stroke-dasharray="2 4" opacity=".7"/>
             </g></g>
@@ -489,7 +502,9 @@
             <g transform="translate(150 124)">
               <g class="drop glow-strong">
                 <path d="M0 -13 C7 -4 9.5 2 9.5 7 A9.5 9.5 0 1 1 -9.5 7 C-9.5 2 -7 -4 0 -13 Z"
-                      fill="rgba(245,143,34,.1)" stroke="url(#g2seed)" stroke-width="2"/>
+                      fill="none" stroke="#F58F22" stroke-opacity=".22" stroke-width="5.5"/>
+                <path d="M0 -13 C7 -4 9.5 2 9.5 7 A9.5 9.5 0 1 1 -9.5 7 C-9.5 2 -7 -4 0 -13 Z"
+                      fill="rgba(245,143,34,.1)" stroke="url(#g2seed)" stroke-width="1.8"/>
                 <text x="-3.5" y="10.5" font-size="10" fill="#FFBB57">♪</text>
               </g>
             </g>
@@ -664,20 +679,10 @@
       root.filters = [new PIXI.filters.AdvancedBloomFilter({
         threshold: .12, bloomScale: 1.6, brightness: 1, blur: 7, quality: 4
       })];
+      root.filterArea = app.renderer.screen;
       softTex = makeSoftTexture();
 
-      rays = new PIXI.Container();
-      for (let i = 0; i < 5; i++) {
-        const gfx = new PIXI.Graphics();
-        gfx.beginFill(0xFFBB57, .16);
-        gfx.moveTo(0, 0); gfx.lineTo(-9, -88); gfx.lineTo(9, -88); gfx.closePath();
-        gfx.endFill();
-        gfx.rotation = i * Math.PI * 2 / 5;
-        gfx.blendMode = PIXI.BLEND_MODES.ADD;
-        rays.addChild(gfx);
-      }
-      rays.visible = false;
-      root.addChild(rays);
+      rays = null;
 
       seedGlow = new PIXI.Sprite(softTex);
       seedGlow.anchor.set(.5); seedGlow.tint = 0xFFBB57; seedGlow.blendMode = PIXI.BLEND_MODES.ADD;
@@ -704,7 +709,7 @@
 
     function emit(t, dt) {
       if (phase === 1) {
-        if (Math.random() < dt * 26) {
+        if (Math.random() < dt * 34) {
           const ang = Math.random() * 6.28, dist = 95 + Math.random() * 55;
           spawn({ x: SEED.x + Math.cos(ang) * dist, y: SEED.y + Math.sin(ang) * dist * .8,
                   mode: 'in', r: .8 + Math.random() * 1.6, sw: Math.random() * 2 - 1 });
@@ -727,7 +732,7 @@
             burstDone = true;
             for (let i = 0; i < 36; i++) {
               const ang = -Math.PI * Math.random(), sp2 = 22 + Math.random() * 40;
-              spawn({ x: POOL.x, y: POOL.y, mode: 'splash', vx: Math.cos(ang) * sp2, vy: Math.sin(ang) * sp2 * .6 - 12, r: .7 + Math.random() * 1.3, life: 1.5 });
+              spawn({ x: POOL.x, y: POOL.y, mode: 'splash', vx: Math.cos(ang) * sp2, vy: Math.sin(ang) * sp2 * .6 - 12, r: .5 + Math.random() * .9, life: 1.5 });
             }
           }
           if (burstDone && Math.random() < dt * 8) spawn({ x: POOL.x + (Math.random() * 90 - 45), y: POOL.y + (Math.random() * 8 - 4), mode: 'rise', vy: -4 - Math.random() * 5, r: .4 + Math.random() * .7, life: 1.6 });
@@ -742,21 +747,14 @@
 
       const pulse = 1 + Math.sin(t * 2.4) * .18;
       seedGlow.position.set(SEED.x * k, SEED.y * k);
-      seedGlow.alpha = phase <= 2 ? .5 : 0;
-      seedGlow.scale.set((54 * k / 64) * pulse);
+      seedGlow.alpha = phase <= 2 ? .3 : 0;
+      seedGlow.scale.set((42 * k / 64) * pulse);
 
       flowerGlow.visible = phase >= 3;
       if (flowerGlow.visible) {
         flowerGlow.position.set(FLOWER.x * k, FLOWER.y * k);
-        flowerGlow.alpha = .45 + Math.sin(t * 2) * .12;
-        flowerGlow.scale.set((70 * k / 64) * (1 + Math.sin(t * 1.7) * .12));
-      }
-
-      rays.visible = phase >= 3;
-      if (rays.visible) {
-        rays.position.set(FLOWER.x * k, FLOWER.y * k);
-        rays.rotation += dt * .18;
-        rays.scale.set(k);
+        flowerGlow.alpha = .26 + Math.sin(t * 2) * .07;
+        flowerGlow.scale.set((52 * k / 64) * (1 + Math.sin(t * 1.7) * .1));
       }
 
       for (let i = parts.length - 1; i >= 0; i--) {
@@ -776,8 +774,8 @@
         }
         if (p.a <= 0) { p.sp.destroy(); parts.splice(i, 1); continue; }
         p.sp.position.set(p.x * k, p.y * k);
-        p.sp.alpha = Math.min(p.a, 1) * .9;
-        p.sp.scale.set(Math.max(p.r * 10 * k, 4) / 64);
+        p.sp.alpha = Math.min(p.a, 1) * .8;
+        p.sp.scale.set(Math.max(p.r * 6 * k, 2.5) / 64);
       }
     }
 
