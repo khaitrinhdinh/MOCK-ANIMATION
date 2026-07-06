@@ -333,7 +333,7 @@
       gsap.fromTo(S.ripple, { alpha: .85 }, { alpha: 0, duration: 1.6, repeat: -1, ease: 'power1.out' });
       gsap.fromTo(S.ripple.scale, { x: S.ripple._base0 * .4, y: S.ripple._base0 * .4 }, { x: S.ripple._base0 * 1.5, y: S.ripple._base0 * 1.5, duration: 1.6, repeat: -1, ease: 'power1.out' });
       // plant + flower recede, the music sphere rises out of the pool
-      ['plant','lotus','sprout','burst','aura'].forEach(k => gsap.to(S[k], { alpha: .1, duration: .8, delay: .15 }));
+      ['plant','lotus','sprout','burst','aura'].forEach(k => gsap.to(S[k], { alpha: 0, duration: .7, delay: .15 }));
       gsap.to(S.sphere, { alpha: 1, duration: .8, delay: .35 });
       gsap.to(S.sphere.position, { y: 165, duration: 1.15, delay: .35, ease: 'power2.out' });
       gsap.to(S.sphere.scale, { x: S.sphere._base0, y: S.sphere._base0, duration: 1.15, delay: .35, ease: 'back.out(1.4)' });
