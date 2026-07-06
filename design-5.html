@@ -110,8 +110,8 @@
   <a class="back" href="index.html">&larr; All designs</a>
   <header class="lede">
     <div class="eyebrow">Design 05 · Cinematic — Real Assets</div>
-    <h1>Built from real sprites: image, not drawing</h1>
-    <p>The seed, lotus, drop and ripple are actual PNG sprites loaded into PixiJS, blended additively, warped by a <code>flow-energy</code> displacement map, and lit with real bloom. This is the asset-based pipeline — quality now scales with the artwork.</p>
+    <h1>Seed → vine → flower → drop → music sphere</h1>
+    <p>Fragments fly into a seed; it sprouts into a vine; a flower blooms on top; the bloom drips a drop that falls into the pool and rises again as the music sphere — all real PNG sprites in PixiJS, displacement-warped and bloom-lit.</p>
   </header>
 
   <main class="demo">
@@ -134,7 +134,7 @@
           </div>
           <div class="hud">
             <div class="progress-row"><div class="bar"><div class="fill" id="fill"></div></div><div class="pct" id="pct">0%</div></div>
-            <div class="status" id="status">The music seed awakens…</div>
+            <div class="status" id="status">Your memories gather into a seed…</div>
             <ol class="steps">
               <li id="s1" data-state="active"><span class="dot">1</span>Analyzing input</li>
               <li id="s2" data-state=""><span class="dot">2</span>Creating melody</li>
@@ -179,7 +179,7 @@
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const tween = (window.gsap) ? (t, v) => gsap.to(t, v) : (t, v) => { for (const k in v) if (k !== 'duration' && k !== 'ease' && k !== 'onComplete') { if (k.includes('.')) { const [a,b]=k.split('.'); t[a][b]=v[k]; } else t[k]=v[k]; } if (v.onComplete) v.onComplete(); };
 
-  const SEED = { x: 150, y: 196 }, FLOWER = { x: 150, y: 150 }, POOL = { x: 150, y: 262 };
+  const SEED = { x: 150, y: 205 }, FLOWER = { x: 150, y: 112 }, POOL = { x: 150, y: 256 };
   const A = 'assets/sprites/';
 
   /* ---- background dust/fog (2D) ---- */
@@ -207,12 +207,12 @@
 
   function loadTex(url) { return new Promise((res, rej) => { const img = new Image(); img.onload = () => res(PIXI.Texture.from(img)); img.onerror = rej; img.src = url; }); }
 
-  const NAMES = ['note_ring','glow_a','beam_a','beam_b','lotus_a','starburst','drop','ripple','spark_star'];
+  const NAMES = ['seed','sprout','plant','lotus_full','note_ring','starburst','glow_a','drop','ripple','spark_star'];
   let app, root, sceneC, dispSprite, T = {}, S = {}, parts = [], phase = 1, phaseAt = 0, burst = false, dropTween = null;
 
   function place(sp, x, y, dispW, blend) {
     sp.anchor.set(.5); sp.position.set(x, y);
-    sp.scale.set(dispW / sp.texture.width); sp.blendMode = blend == null ? PIXI.BLEND_MODES.SCREEN : blend;
+    sp.scale.set(dispW / sp.texture.width); sp._base0 = sp.scale.x; sp.blendMode = blend == null ? PIXI.BLEND_MODES.SCREEN : blend;
     sp.alpha = 0; sceneC.addChild(sp); return sp;
   }
 
@@ -235,20 +235,20 @@
     sceneC.filters = [disp]; S.disp = disp;
 
     if (PIXI.filters.AdvancedBloomFilter) {
-      app.stage.filters = [new PIXI.filters.AdvancedBloomFilter({ threshold: .42, bloomScale: .7, brightness: 1, blur: 5, quality: 4 })];
+      app.stage.filters = [new PIXI.filters.AdvancedBloomFilter({ threshold: .5, bloomScale: .5, brightness: 1, blur: 5, quality: 4 })];
       app.stage.filterArea = app.renderer.screen;
     }
 
     // build sprites
-    S.aura   = place(new PIXI.Sprite(T.glow_a),   SEED.x, SEED.y, 110, PIXI.BLEND_MODES.ADD);
-    S.beamL  = place(new PIXI.Sprite(T.beam_a),   135, 170, 40); S.beamL.anchor.set(.5, 1); S.beamL.position.set(135, 196);
-    S.beamR  = place(new PIXI.Sprite(T.beam_b),   165, 170, 34); S.beamR.anchor.set(.5, 1); S.beamR.position.set(165, 196);
-    S.seed   = place(new PIXI.Sprite(T.note_ring), SEED.x, SEED.y, 58, PIXI.BLEND_MODES.NORMAL);
-    S.burst  = place(new PIXI.Sprite(T.starburst), FLOWER.x, FLOWER.y, 200, PIXI.BLEND_MODES.ADD);
-    S.lotus  = place(new PIXI.Sprite(T.lotus_a),   FLOWER.x, FLOWER.y, 120, PIXI.BLEND_MODES.NORMAL);
-    S.ripple = place(new PIXI.Sprite(T.ripple),    POOL.x, POOL.y, 118, PIXI.BLEND_MODES.NORMAL);
-    S.drop   = place(new PIXI.Sprite(T.drop),      FLOWER.x, FLOWER.y, 32, PIXI.BLEND_MODES.NORMAL);
-
+    S.burst  = place(new PIXI.Sprite(T.starburst),  FLOWER.x, FLOWER.y, 185, PIXI.BLEND_MODES.ADD);
+    S.aura   = place(new PIXI.Sprite(T.glow_a),     150, 196, 66, PIXI.BLEND_MODES.ADD);
+    S.plant  = place(new PIXI.Sprite(T.plant),      150, 256, 74, PIXI.BLEND_MODES.NORMAL); S.plant.anchor.set(.5, 1); S.plant.position.set(150, 256);
+    S.sprout = place(new PIXI.Sprite(T.sprout),     150, 256, 58, PIXI.BLEND_MODES.NORMAL); S.sprout.anchor.set(.5, 1); S.sprout.position.set(150, 256);
+    S.seed   = place(new PIXI.Sprite(T.seed),       SEED.x, SEED.y, 38, PIXI.BLEND_MODES.NORMAL);
+    S.lotus  = place(new PIXI.Sprite(T.lotus_full), FLOWER.x, FLOWER.y, 100, PIXI.BLEND_MODES.NORMAL);
+    S.ripple = place(new PIXI.Sprite(T.ripple),     POOL.x, POOL.y, 120, PIXI.BLEND_MODES.NORMAL);
+    S.drop   = place(new PIXI.Sprite(T.drop),       FLOWER.x, FLOWER.y, 28, PIXI.BLEND_MODES.NORMAL);
+    S.sphere = place(new PIXI.Sprite(T.note_ring),  150, 165, 92, PIXI.BLEND_MODES.NORMAL);
     layout();
     app.ticker.add(() => tick(Math.min(app.ticker.deltaMS / 1000, .05)));
     setScenePhase(1, true);
@@ -257,12 +257,12 @@
   function layout() { if (!app || !W) return; if (app.renderer.width / app.renderer.resolution !== W) app.renderer.resize(W, H); root.scale.set(s); root.position.set(0, oy); }
 
   function spawnSpark() {
-    if (!app || parts.length > 90) return;
+    if (!app || parts.length > 44) return;
     const sp = new PIXI.Sprite(T.spark_star); sp.anchor.set(.5); sp.blendMode = PIXI.BLEND_MODES.ADD;
     sceneC.addChild(sp); const o = { sp, a: 1 };
-    if (phase === 1) { o.mode = 'in'; o.ang = Math.random() * 6.28; o.rad = 80 + Math.random() * 90; o.r = .18 + Math.random() * .16; }
-    else if (phase === 2) { o.mode = 'rise'; o.x = 135 + Math.random() * 30; o.y = 190; o.vy = -30 - Math.random() * 30; o.life = 1.6; o.r = .14 + Math.random() * .12; }
-    else { o.mode = 'out'; o.x = FLOWER.x; o.y = FLOWER.y; const an = Math.random() * 6.28; o.vx = Math.cos(an) * 40; o.vy = Math.sin(an) * 40; o.life = 1.3; o.r = .14 + Math.random() * .12; }
+    if (phase === 1) { o.mode = 'in'; o.ang = Math.random() * 6.28; o.rad = 80 + Math.random() * 90; o.r = .04 + Math.random() * .04; }
+    else if (phase === 2) { o.mode = 'rise'; o.x = 138 + Math.random() * 24; o.y = 240; o.vy = -34 - Math.random() * 28; o.life = 1.6; o.r = .035 + Math.random() * .03; }
+    else { o.mode = 'out'; o.x = FLOWER.x; o.y = FLOWER.y; const an = Math.random() * 6.28; o.vx = Math.cos(an) * 34; o.vy = Math.sin(an) * 34; o.life = 1.3; o.r = .035 + Math.random() * .03; }
     parts.push(o);
   }
 
@@ -276,9 +276,9 @@
     if (S.burst && S.burst.alpha > 0) S.burst.rotation += dt * .12;
 
     // emit
-    let rate = phase === 1 ? 34 : phase === 2 ? 20 : phase >= 3 ? 12 : 0;
+    let rate = phase === 1 ? 12 : phase === 2 ? 7 : phase >= 3 ? 7 : 0;
     if (!reduced && Math.random() < dt * rate) spawnSpark();
-    if (phase === 4 && !burst && (t - phaseAt) > 1.9) { burst = true; for (let i = 0; i < 26; i++) { const sp = new PIXI.Sprite(T.spark_star); sp.anchor.set(.5); sp.blendMode = PIXI.BLEND_MODES.ADD; sceneC.addChild(sp); const an = -Math.PI * Math.random(), v = 40 + Math.random() * 60; parts.push({ sp, a: 1, mode: 'splash', x: POOL.x, y: POOL.y, vx: Math.cos(an) * v, vy: Math.sin(an) * v * .6 - 20, life: 1.4, r: .16 + Math.random() * .14 }); } }
+    if (phase === 4 && !burst && (t - phaseAt) > 1.9) { burst = true; for (let i = 0; i < 16; i++) { const sp = new PIXI.Sprite(T.spark_star); sp.anchor.set(.5); sp.blendMode = PIXI.BLEND_MODES.ADD; sceneC.addChild(sp); const an = -Math.PI * Math.random(), v = 40 + Math.random() * 60; parts.push({ sp, a: 1, mode: 'splash', x: POOL.x, y: POOL.y, vx: Math.cos(an) * v, vy: Math.sin(an) * v * .6 - 20, life: 1.4, r: .04 + Math.random() * .04 }); } }
 
     for (let i = parts.length - 1; i >= 0; i--) {
       const p = parts[i];
@@ -287,55 +287,66 @@
       else if (p.mode === 'out') { p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= .97; p.vy *= .97; p.life -= dt; p.a = Math.max(p.life / 1.3, 0); }
       else if (p.mode === 'splash') { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 90 * dt; p.life -= dt; p.a = Math.max(p.life / 1.4, 0); }
       if (p.a <= 0) { p.sp.destroy(); parts.splice(i, 1); continue; }
-      p.sp.position.set(p.x, p.y); p.sp.alpha = Math.min(p.a, 1) * .9; p.sp.scale.set(p.r);
+      p.sp.position.set(p.x, p.y); p.sp.alpha = Math.min(p.a, 1) * .7; p.sp.scale.set(p.r);
     }
   }
 
-  // per-object full target state per phase (so jumping phases is consistent)
+  // per-object full target state per phase (jumping phases stays consistent)
   function setScenePhase(ph, instant) {
     if (!app) return;
     const D = instant ? 0 : .7, E = 'power2.out';
     const st = {
-      aura:   [ph <= 2 ? .35 : .15, 1],
-      seed:   [ph <= 2 ? 1 : (ph === 3 ? .35 : .15), ph <= 2 ? 1 : .8],
-      beamL:  [ph === 2 ? .9 : (ph >= 3 ? .3 : 0), ph >= 2 ? 1 : .2],
-      beamR:  [ph === 2 ? .9 : (ph >= 3 ? .3 : 0), ph >= 2 ? 1 : .2],
-      burst:  [ph >= 3 ? .4 : 0, 1],
-      lotus:  [ph >= 3 ? .92 : 0, ph >= 3 ? 1 : .55],
-      ripple: [0, 1]
+      seed:   [ph === 1 ? 1 : 0,          .85],
+      sprout: [ph === 2 ? 1 : 0,          ph >= 2 ? 1 : .4],
+      plant:  [ph >= 3 ? 1 : 0,           ph >= 3 ? 1 : .5],
+      lotus:  [ph >= 3 ? 1 : 0,           ph >= 3 ? 1 : .5],
+      burst:  [ph >= 3 ? .42 : 0,         1],
+      aura:   [ph === 1 ? .22 : ph <= 3 ? .13 : .08, 1]
     };
     for (const k in st) {
       const sp = S[k]; if (!sp) continue;
       const [al, scl] = st[k];
-      const baseScale = sp._base0 || (sp._base0 = sp.scale.x);
-      sp._base = baseScale * scl;
-      if (window.gsap) gsap.to(sp, { alpha: al, duration: D, ease: E });
-      else sp.alpha = al;
-      if (window.gsap) gsap.to(sp.scale, { x: baseScale * scl, y: baseScale * scl, duration: D, ease: 'back.out(1.4)' });
-      else sp.scale.set(baseScale * scl);
+      sp._base = sp._base0 * scl;
+      if (window.gsap) { gsap.to(sp, { alpha: al, duration: D, ease: E }); gsap.to(sp.scale, { x: sp._base, y: sp._base, duration: D, ease: 'back.out(1.4)' }); }
+      else { sp.alpha = al; sp.scale.set(sp._base); }
     }
-    // displacement strength: strong energy early, calmer at bloom
     const dispAmt = ph === 1 ? 5 : ph === 2 ? 6 : ph === 3 ? 3 : 2;
     if (S.disp) { if (window.gsap) gsap.to(S.disp.scale, { x: dispAmt, y: dispAmt, duration: instant ? 0 : 1 }); else S.disp.scale.set(dispAmt); }
 
-    // drop + ripple on completion
-    if (S.drop) { if (dropTween) dropTween.kill && dropTween.kill(); S.drop.alpha = 0; S.drop.position.set(FLOWER.x, FLOWER.y); }
-    if (ph === 4) {
-      S.drop.alpha = 0;
-      if (window.gsap) {
-        gsap.to(S.drop, { alpha: 1, duration: .3, delay: .4 });
-        dropTween = gsap.to(S.drop.position, { y: POOL.y, duration: 1.2, delay: .5, ease: 'power2.in', onComplete: () => { gsap.to(S.drop, { alpha: 0, duration: .2 }); gsap.fromTo(S.ripple, { alpha: .9 }, { alpha: 0, duration: 1.6, repeat: -1, ease: 'power1.out' }); gsap.fromTo(S.ripple.scale, { x: S.ripple._base0 * .4, y: S.ripple._base0 * .4 }, { x: S.ripple._base0 * 1.5, y: S.ripple._base0 * 1.5, duration: 1.6, repeat: -1, ease: 'power1.out' }); } });
-      } else { S.drop.alpha = 1; S.ripple.alpha = .6; }
-    }
+    // reset finale objects
+    if (window.gsap) gsap.killTweensOf([S.drop, S.drop.position, S.sphere, S.sphere.position, S.sphere.scale, S.ripple, S.ripple.scale]);
+    S.drop.alpha = 0; S.drop.position.set(FLOWER.x, FLOWER.y);
+    S.sphere.alpha = ph === 4 ? S.sphere.alpha : 0; S.sphere._base = S.sphere._base0;
+    if (ph !== 4) { S.sphere.alpha = 0; S.ripple.alpha = 0; }
+    if (ph === 4) runFinale(instant);
+  }
+
+  // finale: flower drips a drop into the pool, then the drop rises and becomes the music sphere
+  function runFinale(instant) {
+    if (!window.gsap) { S.drop.alpha = 0; S.sphere.alpha = 1; S.sphere.position.set(150, 165); S.ripple.alpha = .5; return; }
+    S.drop.alpha = 0; S.drop.position.set(FLOWER.x, FLOWER.y);
+    S.sphere.alpha = 0; S.sphere.position.set(150, POOL.y - 12); S.sphere.scale.set(S.sphere._base0 * .3);
+    gsap.to(S.drop, { alpha: 1, duration: .3, delay: .4 });
+    gsap.to(S.drop.position, { y: POOL.y - 6, duration: 1.1, delay: .5, ease: 'power2.in', onComplete: () => {
+      gsap.to(S.drop, { alpha: 0, duration: .2 });
+      // ripple rings
+      gsap.fromTo(S.ripple, { alpha: .85 }, { alpha: 0, duration: 1.6, repeat: -1, ease: 'power1.out' });
+      gsap.fromTo(S.ripple.scale, { x: S.ripple._base0 * .4, y: S.ripple._base0 * .4 }, { x: S.ripple._base0 * 1.5, y: S.ripple._base0 * 1.5, duration: 1.6, repeat: -1, ease: 'power1.out' });
+      // plant + flower recede, the music sphere rises out of the pool
+      ['plant','lotus','sprout','burst','aura'].forEach(k => gsap.to(S[k], { alpha: .1, duration: .8, delay: .15 }));
+      gsap.to(S.sphere, { alpha: 1, duration: .8, delay: .35 });
+      gsap.to(S.sphere.position, { y: 165, duration: 1.15, delay: .35, ease: 'power2.out' });
+      gsap.to(S.sphere.scale, { x: S.sphere._base0, y: S.sphere._base0, duration: 1.15, delay: .35, ease: 'back.out(1.4)' });
+    } });
   }
 
   /* ---------- driver ---------- */
   const DUR = 13000, P1 = .34, P2 = .68, P3 = .985;
   const LABELS = {
-    1: ['Phase 1 · Analyze & Nurture', 'The music seed awakens…'],
-    2: ['Phase 2 · Create & Grow', 'Energy rises — the melody takes shape…'],
-    3: ['Phase 3 · Arrange & Bloom', 'The lotus blooms — arranging your music…'],
-    4: ['Drop · Ripples spread across the sound', 'Your song is ready!']
+    1: ['Phase 1 · Analyze & Nurture', 'Your memories gather into a seed…'],
+    2: ['Phase 2 · Create & Grow', 'The seed sprouts — the melody takes root…'],
+    3: ['Phase 3 · Arrange & Bloom', 'A flower blooms atop the vine…'],
+    4: ['Drop · Your song takes form', 'A drop rises into your song…']
   };
   let t0 = null, raf = null, curPhase = 0;
   function phaseOf(p) { return p >= P3 ? 4 : p >= P2 ? 3 : p >= P1 ? 2 : 1; }
