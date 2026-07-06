@@ -83,8 +83,24 @@
   }
   .screen-head h2 { font-size: 1.05rem; font-weight: 800; margin: .3rem 0 0; color: var(--text-primary); }
 
-  .stage { margin: 0 -6px; }
-  .stage svg { display: block; width: 100%; height: auto; }
+  .stage { margin: 0 -6px; position: relative; }
+  .stage svg { display: block; width: 100%; height: auto; position: relative; z-index: 1; }
+  .stage canvas, #grain { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #fxbg { z-index: 0; }
+  #fxfg { z-index: 2; }
+  #grain { z-index: 3; opacity: .07; mix-blend-mode: soft-light; background-repeat: repeat; }
+
+  /* ambient life: every hero object floats, flickers and pulses at once */
+  .floaty { animation: floatY 3.6s ease-in-out infinite; }
+  .floaty2 { animation: floatY 4.6s ease-in-out infinite; }
+  @keyframes floatY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2.5px); } }
+  .flick { animation: flick 5.2s linear infinite; }
+  @keyframes flick {
+    0%,100% { opacity: 1; } 42% { opacity: .86; } 47% { opacity: 1; }
+    71% { opacity: .9; } 76% { opacity: 1; }
+  }
+  .orbit2 { animation: spinRev 18s linear infinite; transform-box: fill-box; transform-origin: center; }
+  @keyframes spinRev { to { transform: rotate(-360deg); } }
 
   /* progress */
   .progress-row { display: flex; align-items: center; gap: 10px; margin-top: -6px; }
@@ -288,7 +304,7 @@
   @keyframes eqBounce { from { transform: scaleY(.2); } to { transform: scaleY(1); } }
 
   @media (prefers-reduced-motion: reduce) {
-    .gp, .stream, .orbit, .note-g, .spark, .ripple, .halo, .eq, .sw .arc,
+    .gp, .stream, .orbit, .orbit2, .floaty, .floaty2, .flick, .note-g, .spark, .ripple, .halo, .eq, .sw .arc,
     .steps li[data-state="active"] .dot, .ph1 .seed-body { animation-iteration-count: 1 !important; }
     * { animation-duration: .01s !important; animation-delay: 0s !important; }
   }
@@ -319,6 +335,7 @@
         </div>
 
         <div class="stage" id="stage">
+          <canvas id="fxbg" aria-hidden="true"></canvas>
           <svg viewBox="0 0 300 300" role="img" aria-label="Fragments of light gather into a seed that blooms and drops into a pool of sound">
             <defs>
               <linearGradient id="g2acc" x1="0" y1="0" x2="0" y2="1">
@@ -367,6 +384,7 @@
               <circle class="gp" cx="96" cy="150" r="1.5" style="--tx:52px;--ty:48px;--d:1.4s;--t:2.4s"/>
               <!-- orbiting dust ring -->
               <circle class="orbit" cx="150" cy="200" r="27" fill="none" stroke="#FFBB57" stroke-width="1" stroke-dasharray="1.5 7" stroke-opacity=".45"/>
+              <circle class="orbit2" cx="150" cy="200" r="42" fill="none" stroke="#F58F22" stroke-width=".8" stroke-dasharray="1 9" stroke-opacity=".28"/>
             </g>
 
             <!-- glowing roots -->
@@ -377,15 +395,17 @@
               <path class="root" d="M150 212 q15 11 22 26" style="--d:.95s"/>
             </g>
 
-            <!-- seed of light -->
+            <!-- seed of light: multi-layer bloom stack -->
+            <ellipse cx="150" cy="198" rx="55" ry="48" fill="url(#g2halo)" opacity=".15"/>
             <ellipse class="halo" cx="150" cy="198" rx="34" ry="30" fill="url(#g2halo)"/>
-            <g class="seed-body glow-strong">
+            <g class="floaty"><g class="flick"><g class="seed-body glow-strong">
               <path d="M150 180 C158 190 161 197 161 203 A11 11 0 1 1 139 203 C139 197 142 190 150 180 Z"
                     fill="rgba(245,143,34,.08)" stroke="url(#g2seed)" stroke-width="1.8"/>
               <path d="M150 209 C150 202 150 196 150 191" fill="none" stroke="#FFBB57" stroke-width="1.2" stroke-linecap="round"/>
               <path d="M150 196 C147 194 145 191 145 188 C148 189 150 192 150 196 Z" fill="none" stroke="#FFBB57" stroke-width="1"/>
               <path d="M150 196 C153 194 155 191 155 188 C152 189 150 192 150 196 Z" fill="none" stroke="#FFBB57" stroke-width="1"/>
-            </g>
+              <ellipse cx="146.5" cy="197" rx="2" ry="3.5" fill="#fff" opacity=".5"/>
+            </g></g></g>
 
             <!-- layered growth: back silhouette leaves -->
             <path class="pop2" d="M150 192 C122 178 110 152 112 122 C140 136 151 164 150 192 Z" fill="rgba(245,143,34,.06)" style="--d:1.5s;--o:50% 100%"/>
@@ -435,7 +455,7 @@
             </g>
 
             <!-- triple-layer lotus -->
-            <g transform="translate(150 122)">
+            <g class="floaty2"><g transform="translate(150 122)">
               <g transform="rotate(0)"><ellipse class="petal-e glow-soft" cx="0" cy="-16" rx="9.5" ry="16" fill="rgba(245,143,34,.12)" stroke="#F58F22" stroke-width="1.3" style="--d:.05s"/></g>
               <g transform="rotate(60)"><ellipse class="petal-e glow-soft" cx="0" cy="-16" rx="9.5" ry="16" fill="rgba(245,143,34,.12)" stroke="#F58F22" stroke-width="1.3" style="--d:.14s"/></g>
               <g transform="rotate(120)"><ellipse class="petal-e glow-soft" cx="0" cy="-16" rx="9.5" ry="16" fill="rgba(245,143,34,.12)" stroke="#F58F22" stroke-width="1.3" style="--d:.23s"/></g>
@@ -454,7 +474,7 @@
               <g transform="rotate(315)"><ellipse class="petal-e" cx="0" cy="-7" rx="4.2" ry="7" fill="rgba(255,227,189,.28)" stroke="#ffe3bd" stroke-width=".9" style="--d:.96s"/></g>
               <circle class="fcenter glow-strong" r="6" fill="url(#g2seed)"/>
               <circle class="fcenter" r="9.5" fill="none" stroke="#FFBB57" stroke-width=".8" stroke-dasharray="2 4" opacity=".7"/>
-            </g>
+            </g></g>
 
             <!-- sparkles -->
             <g class="sparkles" fill="#ffe3bd">
@@ -502,6 +522,8 @@
               <rect class="eq" x="195" y="281" width="3" height="11" rx="1.5" style="--d:.05s"/>
             </g>
           </svg>
+          <canvas id="fxfg" aria-hidden="true"></canvas>
+          <div id="grain" aria-hidden="true"></div>
         </div>
 
         <div class="progress-row">
@@ -527,6 +549,7 @@
     <aside class="info">
       <h3>How it's built</h3>
       <ul class="tech">
+        <li><strong>Level-3 GPU pipeline</strong> — the illustration stays crisp SVG; behind it a 2D canvas drifts fog, dust and stars; in front a <code>PixiJS</code> WebGL layer renders the particle engine, glow cores and volumetric rays through a real <code>AdvancedBloomFilter</code> — actual bloom, not box-shadow.</li>
         <li><strong>Energy streams &amp; fragments</strong> — thin bezier paths with a travelling dash (<code>stroke-dashoffset</code> loop) flow into the seed, while fine dots converge along their own <code>--tx/--ty</code> vectors and a dotted ring orbits the seed.</li>
         <li><strong>Layered growth</strong> — silhouette leaves behind, main stem + two side stems, four vein-detailed leaves, two tip leaves and buds, each on its own delay.</li>
         <li><strong>Triple-layer lotus</strong> — 6 + 6 + 4 translucent petals unfold, finished with a dotted halo ring around the glowing core.</li>
@@ -536,7 +559,7 @@
 
       <div class="size-badge">
         <span class="kb" id="kb">…</span>
-        <span class="lbl">total weight of <strong>this entire page</strong> — HTML + CSS + JS + artwork + embedded font, before gzip. The Rive/Lottie runtime alone is ~100 KB.</span>
+        <span class="lbl">weight of <strong>this page itself</strong> (HTML + CSS + JS + artwork + embedded font, before gzip) — plus the PixiJS runtime (~150 KB gzip) loaded from CDN for the GPU bloom layer; in the real app it would be lazy-loaded when the user taps Generate.</span>
       </div>
 
       <div class="controls">
@@ -551,6 +574,8 @@
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.3/dist/pixi.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pixi-filters@5.3.0/dist/browser/pixi-filters.min.js"></script>
 <script>
 (function () {
   const stage = document.getElementById('stage');
@@ -560,6 +585,228 @@
   const phaseLabel = document.getElementById('phaseLabel');
   const phTitle = document.getElementById('phTitle');
   const steps = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3')];
+
+  /* ===== Level-3 FX: 2D atmosphere behind + PixiJS GPU particles with real bloom in front ===== */
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const SEED = { x: 150, y: 200 }, FLOWER = { x: 150, y: 122 }, POOL = { x: 150, y: 262 };
+  const TINTS = [0xFFBB57, 0xF58F22, 0xFFE3BD];
+
+  /* background atmosphere: drifting fog + dust field (2D canvas, behind the SVG) */
+  const bgC = document.getElementById('fxbg');
+  const b = bgC.getContext('2d');
+  let W = 0, H = 0, k = 1;
+  const stars = [];
+  for (let i = 0; i < 46; i++) stars.push({
+    x: Math.random() * 300, y: Math.random() * 300, r: .4 + Math.random() * 1.1,
+    p: Math.random() * 6.28, s: .3 + Math.random() * 1.2, d: .002 + Math.random() * .01
+  });
+
+  function bgResize() {
+    const r = stage.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    bgC.width = r.width * dpr; bgC.height = r.height * dpr;
+    b.setTransform(dpr, 0, 0, dpr, 0, 0);
+    W = r.width; H = r.height; k = W / 300;
+  }
+
+  function drawBg(t) {
+    b.clearRect(0, 0, W, H);
+    b.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 3; i++) {
+      const cx = 150 + Math.sin(t * .12 + i * 2.1) * 60, cy = 90 + i * 70 + Math.cos(t * .09 + i) * 24;
+      const g = b.createRadialGradient(cx * k, cy * k, 0, cx * k, cy * k, 95 * k);
+      g.addColorStop(0, i === 1 ? 'rgba(120,80,200,.045)' : 'rgba(245,143,34,.05)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      b.fillStyle = g; b.fillRect(0, 0, W, H);
+    }
+    for (const s of stars) {
+      s.x += s.d; if (s.x > 300) s.x = 0;
+      const a = .1 + .3 * (0.5 + 0.5 * Math.sin(t * s.s + s.p));
+      b.fillStyle = 'rgba(255,220,170,' + a.toFixed(3) + ')';
+      b.beginPath(); b.arc(s.x * k, s.y * k, s.r * k, 0, 6.28); b.fill();
+    }
+  }
+
+  function bgLoop(ms) {
+    if (!W) bgResize();
+    drawBg(ms / 1000);
+    requestAnimationFrame(bgLoop);
+  }
+
+  const fx = (() => {
+    let phase = 1, phaseAt = 0, burstDone = false;
+    let app = null, root = null, softTex = null, rays = null, seedGlow = null, flowerGlow = null;
+    const parts = [];
+
+    function makeSoftTexture() {
+      const oc = document.createElement('canvas'); oc.width = oc.height = 64;
+      const c = oc.getContext('2d');
+      const g = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+      g.addColorStop(0, 'rgba(255,255,255,1)');
+      g.addColorStop(.35, 'rgba(255,255,255,.55)');
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      c.fillStyle = g; c.fillRect(0, 0, 64, 64);
+      return PIXI.Texture.from(oc);
+    }
+
+    function init() {
+      if (!(window.PIXI && PIXI.filters && PIXI.filters.AdvancedBloomFilter)) return false;
+      bgResize();
+      app = new PIXI.Application({
+        view: document.getElementById('fxfg'),
+        backgroundAlpha: 0, antialias: true, autoDensity: true,
+        resolution: Math.min(window.devicePixelRatio || 1, 2),
+        width: W || 300, height: H || 300
+      });
+      root = new PIXI.Container();
+      app.stage.addChild(root);
+      root.filters = [new PIXI.filters.AdvancedBloomFilter({
+        threshold: .12, bloomScale: 1.6, brightness: 1, blur: 7, quality: 4
+      })];
+      softTex = makeSoftTexture();
+
+      rays = new PIXI.Container();
+      for (let i = 0; i < 5; i++) {
+        const gfx = new PIXI.Graphics();
+        gfx.beginFill(0xFFBB57, .16);
+        gfx.moveTo(0, 0); gfx.lineTo(-9, -88); gfx.lineTo(9, -88); gfx.closePath();
+        gfx.endFill();
+        gfx.rotation = i * Math.PI * 2 / 5;
+        gfx.blendMode = PIXI.BLEND_MODES.ADD;
+        rays.addChild(gfx);
+      }
+      rays.visible = false;
+      root.addChild(rays);
+
+      seedGlow = new PIXI.Sprite(softTex);
+      seedGlow.anchor.set(.5); seedGlow.tint = 0xFFBB57; seedGlow.blendMode = PIXI.BLEND_MODES.ADD;
+      root.addChild(seedGlow);
+
+      flowerGlow = new PIXI.Sprite(softTex);
+      flowerGlow.anchor.set(.5); flowerGlow.tint = 0xFFD9A0; flowerGlow.blendMode = PIXI.BLEND_MODES.ADD;
+      flowerGlow.visible = false;
+      root.addChild(flowerGlow);
+
+      app.ticker.add(() => tick(Math.min(app.ticker.deltaMS / 1000, .05)));
+      return true;
+    }
+
+    function spawn(o) {
+      if (!app || parts.length >= 260) return;
+      const sp = new PIXI.Sprite(softTex);
+      sp.anchor.set(.5);
+      sp.tint = TINTS[Math.random() * 3 | 0];
+      sp.blendMode = PIXI.BLEND_MODES.ADD;
+      root.addChild(sp);
+      parts.push(Object.assign({ a: 1, r: 1.2, sp }, o));
+    }
+
+    function emit(t, dt) {
+      if (phase === 1) {
+        if (Math.random() < dt * 26) {
+          const ang = Math.random() * 6.28, dist = 95 + Math.random() * 55;
+          spawn({ x: SEED.x + Math.cos(ang) * dist, y: SEED.y + Math.sin(ang) * dist * .8,
+                  mode: 'in', r: .8 + Math.random() * 1.6, sw: Math.random() * 2 - 1 });
+        }
+        if (Math.random() < dt * 6) spawn({ x: SEED.x + (Math.random() * 14 - 7), y: SEED.y + 6, mode: 'rise', vy: -6 - Math.random() * 8, r: .6 + Math.random(), life: 1.6 });
+      } else if (phase === 2) {
+        if (Math.random() < dt * 12) spawn({ x: 150 + (Math.random() * 30 - 15), y: 150 + Math.random() * 50, mode: 'rise', vy: -8 - Math.random() * 10, r: .5 + Math.random() * .9, life: 2 });
+      } else if (phase >= 3) {
+        if (Math.random() < dt * 10) {
+          const ang = Math.random() * 6.28;
+          spawn({ x: FLOWER.x, y: FLOWER.y, mode: 'out', vx: Math.cos(ang) * 14, vy: Math.sin(ang) * 14, r: .5 + Math.random() * .9, life: 1.4 });
+        }
+        if (phase === 4) {
+          const el = t - phaseAt;
+          if (!burstDone && el > .3 && el < 2.0) {
+            const pr = (el - .3) / 1.7;
+            if (Math.random() < dt * 40) spawn({ x: FLOWER.x + (Math.random() * 4 - 2), y: FLOWER.y + 2 + pr * 140, mode: 'out', vx: Math.random() * 10 - 5, vy: -6, r: .4 + Math.random() * .6, life: .8 });
+          }
+          if (!burstDone && el > 2.0) {
+            burstDone = true;
+            for (let i = 0; i < 36; i++) {
+              const ang = -Math.PI * Math.random(), sp2 = 22 + Math.random() * 40;
+              spawn({ x: POOL.x, y: POOL.y, mode: 'splash', vx: Math.cos(ang) * sp2, vy: Math.sin(ang) * sp2 * .6 - 12, r: .7 + Math.random() * 1.3, life: 1.5 });
+            }
+          }
+          if (burstDone && Math.random() < dt * 8) spawn({ x: POOL.x + (Math.random() * 90 - 45), y: POOL.y + (Math.random() * 8 - 4), mode: 'rise', vy: -4 - Math.random() * 5, r: .4 + Math.random() * .7, life: 1.6 });
+        }
+      }
+    }
+
+    function tick(dt) {
+      const t = performance.now() / 1000;
+      if (W && app.renderer.width / app.renderer.resolution !== W) app.renderer.resize(W, H);
+      emit(t, dt);
+
+      const pulse = 1 + Math.sin(t * 2.4) * .18;
+      seedGlow.position.set(SEED.x * k, SEED.y * k);
+      seedGlow.alpha = phase <= 2 ? .5 : 0;
+      seedGlow.scale.set((54 * k / 64) * pulse);
+
+      flowerGlow.visible = phase >= 3;
+      if (flowerGlow.visible) {
+        flowerGlow.position.set(FLOWER.x * k, FLOWER.y * k);
+        flowerGlow.alpha = .45 + Math.sin(t * 2) * .12;
+        flowerGlow.scale.set((70 * k / 64) * (1 + Math.sin(t * 1.7) * .12));
+      }
+
+      rays.visible = phase >= 3;
+      if (rays.visible) {
+        rays.position.set(FLOWER.x * k, FLOWER.y * k);
+        rays.rotation += dt * .18;
+        rays.scale.set(k);
+      }
+
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const p = parts[i];
+        if (p.mode === 'in') {
+          const dx = SEED.x - p.x, dy = SEED.y - p.y, dst = Math.hypot(dx, dy) || 1;
+          const sp2 = 34 + (140 - Math.min(dst, 140)) * .5;
+          p.x += (dx / dst) * sp2 * dt + Math.sin(t * 3 + p.sw * 9) * p.sw * 14 * dt;
+          p.y += (dy / dst) * sp2 * dt + Math.cos(t * 2.6 + p.sw * 7) * p.sw * 10 * dt;
+          if (dst < 7) p.a = 0; else p.a -= dt * .12;
+        } else if (p.mode === 'rise') {
+          p.y += p.vy * dt; p.x += Math.sin(t * 2 + p.y * .15) * 6 * dt; p.life -= dt; p.a = Math.min(Math.max(p.life, 0), 1);
+        } else if (p.mode === 'out') {
+          p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= .98; p.vy *= .98; p.life -= dt; p.a = Math.max(p.life / 1.4, 0);
+        } else if (p.mode === 'splash') {
+          p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 60 * dt; p.life -= dt; p.a = Math.max(p.life / 1.5, 0);
+        }
+        if (p.a <= 0) { p.sp.destroy(); parts.splice(i, 1); continue; }
+        p.sp.position.set(p.x * k, p.y * k);
+        p.sp.alpha = Math.min(p.a, 1) * .9;
+        p.sp.scale.set(Math.max(p.r * 10 * k, 4) / 64);
+      }
+    }
+
+    bgResize();
+    addEventListener('resize', () => { bgResize(); if (app) app.renderer.resize(W, H); });
+    if (!reduced) {
+      requestAnimationFrame(bgLoop);
+      init();
+    } else {
+      bgResize(); drawBg(0);
+    }
+
+    return {
+      setPhase(ph) { if (ph !== phase) { phase = ph; phaseAt = performance.now() / 1000; if (ph < 4) burstDone = false; } },
+      reset() { for (const p of parts) p.sp.destroy(); parts.length = 0; phase = 1; burstDone = false; }
+    };
+  })();
+
+  /* film grain overlay */
+  (function () {
+    const g = document.createElement('canvas'); g.width = g.height = 64;
+    const c = g.getContext('2d'), im = c.createImageData(64, 64);
+    for (let i = 0; i < im.data.length; i += 4) {
+      const v = 118 + Math.random() * 20 | 0;
+      im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255;
+    }
+    c.putImageData(im, 0, 0);
+    document.getElementById('grain').style.backgroundImage = 'url(' + g.toDataURL() + ')';
+  })();
 
   const DUR = 13000;
   const P1 = 0.34, P2 = 0.68, P3 = 0.985;
@@ -587,6 +834,7 @@
     if (ph >= 4) want.push('done');
     want.forEach(c => stage.classList.add(c));
     curPhase = ph;
+    fx.setPhase(ph);
 
     const [label, status] = LABELS[ph];
     phaseLabel.textContent = label;
@@ -613,6 +861,7 @@
   function startAt(offsetMs) {
     cancelAnimationFrame(raf);
     curPhase = 0;
+    fx.reset();
     stage.className = 'stage';
     void stage.offsetWidth;
     t0 = null;
