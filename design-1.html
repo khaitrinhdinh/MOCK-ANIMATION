@@ -62,16 +62,35 @@
   }
   .lede p { color: var(--panel-dim); font-size: .95rem; max-width: 52ch; margin: 0 auto; }
 
-  /* variant tabs */
-  .vtabs { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-bottom: 2rem; }
-  .vtab {
-    font-family: inherit; font-size: .84rem; font-weight: 700; cursor: pointer;
-    border-radius: 99px; padding: .5rem 1.05rem; transition: all .15s;
-    background: transparent; border: 1px solid rgba(239,230,210,.25); color: var(--panel-dim);
+  /* variation picker */
+  .pgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap: 1.25rem; }
+  .pcard {
+    font-family: inherit; text-align: left; cursor: pointer; padding: 0; color: inherit;
+    background: #2a2018; border: 1px solid #3d2f22; border-radius: 18px; overflow: hidden;
+    transition: transform .2s, border-color .2s, box-shadow .2s;
   }
-  .vtab:hover { border-color: var(--gold); color: var(--gold); }
-  .vtab.on { background: rgba(212,169,60,.14); border-color: var(--gold); color: var(--gold); }
-  .vtab:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .pcard:hover {
+    transform: translateY(-4px); border-color: var(--gold);
+    box-shadow: 0 18px 36px -18px rgba(0,0,0,.6);
+  }
+  .pcard:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+  .pcard .pv { background: var(--cream); height: 128px; display: grid; place-items: center; border-bottom: 1px solid #3d2f22; }
+  .pcard[data-variant="firefly"] .pv { background: #262b4a; }
+  .pcard .pv svg { width: 110px; height: 100px; }
+  .pcard .pb { padding: .9rem 1.1rem 1.1rem; }
+  .pcard .pb strong { display: block; font-size: .95rem; color: var(--cream); margin-bottom: .3rem; }
+  .pcard .pb span { display: block; font-size: .77rem; line-height: 1.5; color: var(--panel-dim); }
+  .pcard .go { display: inline-block; margin-top: .55rem; font-size: .76rem; font-weight: 800; color: var(--gold); }
+
+  /* view switching: picker first, demo after a variation is chosen */
+  body:not([data-view="demo"]) .demo,
+  body:not([data-view="demo"]) .demo-nav { display: none; }
+  body[data-view="demo"] .picker,
+  body[data-view="demo"] .back-top { display: none; }
+
+  .demo-nav { display: flex; align-items: center; justify-content: center; gap: .9rem; margin-bottom: 1.5rem; }
+  .demo-nav .vname { font-weight: 800; color: var(--cream); font-size: .95rem; }
+  button.back { background: transparent; font-family: inherit; cursor: pointer; }
 
   .demo { display: flex; flex-wrap: wrap; gap: 2.5rem; justify-content: center; align-items: flex-start; }
 
@@ -316,18 +335,83 @@
 <body>
 
 <div class="wrap">
-  <a class="back" href="index.html">&larr; All designs</a>
+  <a class="back back-top" href="index.html">&larr; All designs</a>
   <header class="lede">
     <div class="eyebrow">Design 01 · Music Seed Garden</div>
     <h1>Loading screen: Plant the seed → Bloom → Music Drop</h1>
-    <p>Four seed-drop design concepts, three animation phases each — all in a single HTML file. No Lottie, no Rive, no libraries.</p>
+    <p>Four variations on one idea — pick one below to watch its three loading phases. Pure SVG + CSS, one HTML file, no libraries.</p>
   </header>
 
-  <div class="vtabs" role="tablist" aria-label="Design variations">
-    <button class="vtab on" data-variant="classic">🌼 Classic</button>
-    <button class="vtab" data-variant="raindrop">🌧️ Raindrop</button>
-    <button class="vtab" data-variant="firefly">✨ Firefly</button>
-    <button class="vtab" data-variant="bonsai">🌳 Bonsai</button>
+  <div class="picker" id="pickerView">
+    <div class="pgrid">
+      <button class="pcard" data-variant="classic">
+        <span class="pv"><svg viewBox="0 0 120 110" aria-hidden="true">
+          <path d="M28 92 Q60 72 92 92 Z" fill="#6d4b2c"/>
+          <path d="M60 82 C61 70 58 62 60 50" stroke="#46702e" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+          <path d="M59 74 C51 73 45 67 43 58 C52 61 57 67 59 74 Z" fill="#5f8f3e"/>
+          <path d="M61 74 C69 73 75 67 77 58 C68 61 63 67 61 74 Z" fill="#6fa14b"/>
+          <g transform="translate(60 44)">
+            <g transform="rotate(0)"><ellipse cx="0" cy="-8" rx="5" ry="8.5" fill="#fbf6e8" stroke="#cbbb92" stroke-width="1.2"/></g>
+            <g transform="rotate(60)"><ellipse cx="0" cy="-8" rx="5" ry="8.5" fill="#fbf6e8" stroke="#cbbb92" stroke-width="1.2"/></g>
+            <g transform="rotate(120)"><ellipse cx="0" cy="-8" rx="5" ry="8.5" fill="#fbf6e8" stroke="#cbbb92" stroke-width="1.2"/></g>
+            <g transform="rotate(180)"><ellipse cx="0" cy="-8" rx="5" ry="8.5" fill="#fbf6e8" stroke="#cbbb92" stroke-width="1.2"/></g>
+            <g transform="rotate(240)"><ellipse cx="0" cy="-8" rx="5" ry="8.5" fill="#fbf6e8" stroke="#cbbb92" stroke-width="1.2"/></g>
+            <g transform="rotate(300)"><ellipse cx="0" cy="-8" rx="5" ry="8.5" fill="#fbf6e8" stroke="#cbbb92" stroke-width="1.2"/></g>
+            <circle r="5.5" fill="#e6b93f" stroke="#c99a2c" stroke-width="1.4"/>
+          </g>
+          <text x="22" y="34" font-size="9" fill="#a87c2c">♪</text>
+          <text x="90" y="26" font-size="8" fill="#5f8f3e">♫</text>
+        </svg></span>
+        <span class="pb"><strong>🌼 Classic</strong><span>Nutrient particles feed the seed until it blooms.</span><span class="go">Watch →</span></span>
+      </button>
+      <button class="pcard" data-variant="raindrop">
+        <span class="pv"><svg viewBox="0 0 120 110" aria-hidden="true">
+          <ellipse cx="48" cy="24" rx="14" ry="9" fill="#c3ccd6"/>
+          <ellipse cx="66" cy="20" rx="16" ry="10" fill="#cdd6df"/>
+          <ellipse cx="80" cy="26" rx="11" ry="8" fill="#bfc9d4"/>
+          <g stroke="#6fa3c8" stroke-width="2.2" stroke-linecap="round">
+            <line x1="48" y1="40" x2="48" y2="48"/><line x1="62" y1="44" x2="62" y2="52"/><line x1="76" y1="40" x2="76" y2="48"/>
+          </g>
+          <path d="M28 92 Q60 72 92 92 Z" fill="#6d4b2c"/>
+          <path d="M60 82 C61 72 58 66 60 58" stroke="#46702e" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+          <path d="M59 76 C52 75 47 70 45 62 C53 65 57 70 59 76 Z" fill="#5f8f3e"/>
+          <path d="M61 76 C68 75 73 70 75 62 C67 65 63 70 61 76 Z" fill="#6fa14b"/>
+        </svg></span>
+        <span class="pb"><strong>🌧️ Raindrop</strong><span>A little rain cloud waters the seed.</span><span class="go">Watch →</span></span>
+      </button>
+      <button class="pcard" data-variant="firefly">
+        <span class="pv"><svg viewBox="0 0 120 110" aria-hidden="true">
+          <circle cx="92" cy="20" r="9" fill="#f0dfa6"/><circle cx="97" cy="16" r="8" fill="#262b4a"/>
+          <circle cx="30" cy="14" r="1.2" fill="#cfc7ee"/><circle cx="52" cy="24" r="1" fill="#cfc7ee"/>
+          <g fill="#ffe28a">
+            <circle cx="34" cy="46" r="2.4"/><circle cx="80" cy="56" r="2"/><circle cx="50" cy="34" r="1.6"/><circle cx="70" cy="40" r="1.8"/>
+          </g>
+          <path d="M28 92 Q60 72 92 92 Z" fill="#3c3358"/>
+          <path d="M60 82 C61 72 58 66 60 58" stroke="#5d9c49" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+          <path d="M59 76 C52 75 47 70 45 62 C53 65 57 70 59 76 Z" fill="#6fb257"/>
+          <path d="M61 76 C68 75 73 70 75 62 C67 65 63 70 61 76 Z" fill="#7cc264"/>
+          <ellipse cx="60" cy="80" rx="4" ry="5" fill="#ffd75e"/>
+        </svg></span>
+        <span class="pb"><strong>✨ Firefly</strong><span>Fireflies light up the seed at night.</span><span class="go">Watch →</span></span>
+      </button>
+      <button class="pcard" data-variant="bonsai">
+        <span class="pv"><svg viewBox="0 0 120 110" aria-hidden="true">
+          <path d="M40 78 L80 78 L76 92 L44 92 Z" fill="#a8552f"/>
+          <rect x="37" y="73" width="46" height="7" rx="3.5" fill="#8a4526"/>
+          <path d="M60 76 C61 66 52 62 53 52 C54 44 63 42 61 32" stroke="#7a5230" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <ellipse cx="46" cy="52" rx="11" ry="7" fill="#5f8f3e"/>
+          <ellipse cx="60" cy="30" rx="14" ry="9" fill="#6fa14b"/>
+          <ellipse cx="75" cy="41" rx="9" ry="6" fill="#578a39"/>
+          <circle cx="75" cy="48" r="3.5" fill="#e6b93f" stroke="#c9973a" stroke-width="1.2"/>
+        </svg></span>
+        <span class="pb"><strong>🌳 Bonsai</strong><span>A tiny bonsai grows one golden fruit.</span><span class="go">Watch →</span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="demo-nav">
+    <button class="back" id="backToPicker">&larr; Variations</button>
+    <span class="vname" id="vname">🌼 Classic</span>
   </div>
 
   <main class="demo">
@@ -760,18 +844,31 @@
     });
   });
 
-  document.querySelectorAll('.vtab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.vtab').forEach(x => x.classList.toggle('on', x === btn));
-      phone.dataset.variant = btn.dataset.variant;
-      startAt(0);
-    });
+  const NAMES = { classic: '🌼 Classic', raindrop: '🌧️ Raindrop', firefly: '✨ Firefly', bonsai: '🌳 Bonsai' };
+
+  function openVariant(v) {
+    phone.dataset.variant = v;
+    document.getElementById('vname').textContent = NAMES[v];
+    document.body.dataset.view = 'demo';
+    history.replaceState(null, '', '#' + v);
+    startAt(0);
+  }
+
+  document.querySelectorAll('.pcard').forEach(btn => {
+    btn.addEventListener('click', () => openVariant(btn.dataset.variant));
+  });
+
+  document.getElementById('backToPicker').addEventListener('click', () => {
+    cancelAnimationFrame(raf);
+    delete document.body.dataset.view;
+    history.replaceState(null, '', location.pathname);
   });
 
   const bytes = new Blob([document.documentElement.outerHTML]).size;
   document.getElementById('kb').textContent = (bytes / 1024).toFixed(1) + ' KB';
 
-  startAt(0);
+  const initial = location.hash.slice(1);
+  if (NAMES[initial]) openVariant(initial);
 })();
 </script>
 </body>
