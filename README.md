@@ -8,6 +8,7 @@ Loading-screen design concepts for the song-generation flow, built with **pure S
 - `design-1.html` — **Design 01 · Music Seed Garden**: a seed is planted, grows and blooms, then your song falls as a golden music drop. 4 variations (Classic 🌼 · Raindrop 🌧️ · Firefly ✨ · Bonsai 🌳), 3 animation phases each.
 - `design-2.html` — **Design 02 · Golden Bloom**: fragments of light gather into a seed of music on a dark screen; it blooms into a glowing lotus and the song drops into the music pool.
 - `design-3.html` — **Design 03 · Music Seed Mascot**: a cute seed mascot in the app's flat design language — breathes, blinks, sways, grows with progress, blooms and gives one golden drop. Pure SVG + CSS, zero dependencies.
+- `design-4.html` — **Design 04 · Painted Bloom**: the cinematic scene rebuilt from soft color-mass blobs (blur + bloom in Pixi) instead of line-art — reads as a glowing image, minimal outlines.
 
 ## Run
 
