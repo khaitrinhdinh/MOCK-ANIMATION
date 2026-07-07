@@ -214,8 +214,19 @@
 
   /* crossfade the growth scenes by progress */
   function setGrowth(p) {
-    const pos = Math.min(p / 0.86, 1) * (scenes.length - 1);
-    scenes.forEach((im, i) => { im.style.opacity = Math.max(0, 1 - Math.abs(i - pos)).toFixed(3); });
+    // reveal each taller stage from the base UP, so the plant feels like it extends
+    // (the 4 scenes share the same background, so only the growing plant appears)
+    const g = Math.min(p / 0.86, 1) * (scenes.length - 1);
+    scenes.forEach((im, i) => {
+      if (i === 0) { im.style.opacity = 1; im.style.maskImage = im.style.webkitMaskImage = 'none'; im.style.transform = 'none'; return; }
+      const f = Math.max(0, Math.min(1, g - (i - 1)));       // 0..1 growth reveal for this stage
+      if (f <= 0) { im.style.opacity = 0; return; }
+      im.style.opacity = 1;
+      const X = (f * 100).toFixed(1), Y = Math.min(f * 100 + 16, 100).toFixed(1);
+      const grad = 'linear-gradient(to top, #000 ' + X + '%, rgba(0,0,0,0) ' + Y + '%)';
+      im.style.maskImage = grad; im.style.webkitMaskImage = grad;
+      im.style.transform = 'translateY(' + ((1 - f) * 8).toFixed(1) + 'px)';  // subtle rise into place
+    });
   }
 
   /* finale: a golden drop falls over the final scene, then ripples */
