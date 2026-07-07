@@ -13,6 +13,7 @@ Loading-screen design concepts for the song-generation flow, built with **pure S
 - `design-6.html` — **Design 06 · Realistic Coffee**: photorealistic coffee bean → sprout → dewy leaf → golden drop, from real 1024px alpha PNGs packed into `coffee_atlas.png` + `coffee_atlas.json`, composited in PixiJS.
 - `design-7.html` — **Design 07 · Cinematic Coffee**: four consistent AI-rendered growth scenes cross-fade with the progress bar under a Ken Burns push-in, warm dust and a golden-drop finale. Pure CSS crossfade + GSAP, no WebGL. Scenes in `assets/scene1-4.jpg`.
 - `design-8.html` — **Design 08 · Video Phases**: player scaffold — one short video per phase (`assets/video1/2/3`), played once then last frame held with looping ambient until the backend advances; falls back to still posters when clips are absent.
+- `design-9.html` — **Design 09 · Grown by Code**: a coffee plant drawn entirely in PixiJS + GSAP (no assets) — stem and leaf pairs grow continuously with the progress bar, then a golden music-seed ripens at the top with a ring pulse and sparkle burst.
 
 ## Run
 
