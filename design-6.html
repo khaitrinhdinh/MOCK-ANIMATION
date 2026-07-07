@@ -48,8 +48,8 @@
   .cam { position: absolute; inset: 0; z-index: 1; transition: transform 2.8s cubic-bezier(.3,.7,.3,1); transform-origin: 50% 60%; }
   .screen[data-ph="1"] .cam { transform: scale(1.07); transform-origin: 50% 66%; }
   .screen[data-ph="2"] .cam { transform: scale(1.02); transform-origin: 50% 55%; }
-  .screen[data-ph="3"] .cam { transform: scale(1.13); transform-origin: 50% 45%; }
-  .screen[data-ph="4"] .cam { transform: scale(1.0); transform-origin: 50% 58%; }
+  .screen[data-ph="3"] .cam { transform: scale(1.3); transform-origin: 52% 34%; }
+  .screen[data-ph="4"] .cam { transform: scale(1.04); transform-origin: 50% 64%; }
 
   .stage { position: absolute; inset: 0; }
   .stage canvas, #grain, .flash { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
@@ -181,7 +181,8 @@
 
   const ATLAS = 'assets/coffee_atlas.png';
   const FR = { bean:[0,0,460,393], plant:[464,0,367,460], leaf:[835,0,358,460], drop:[1197,0,413,460], ripple:[0,464,460,460], particles:[464,464,460,459], glow:[928,464,458,460] };
-  const GROUND = 222, BEAN = { x: 150, y: 200 }, LEAFTIP = { x: 162, y: 160 };
+  const GROUND = 222, BEAN = { x: 150, y: 200 };
+  const ROLL = { x0: 126, y0: 74, x1: 160, y1: 116, x2: 186, y2: 166 };  // drop path along the leaf -> tip
 
   /* background dust/fog */
   const bgC = document.getElementById('fxbg'), b = bgC.getContext('2d');
@@ -198,6 +199,9 @@
   function loadTex(url) { return new Promise((res, rej) => { const img = new Image(); img.onload = () => res(PIXI.Texture.from(img)); img.onerror = rej; img.src = url; }); }
 
   let app, root, sceneC, T = {}, S = {}, parts = [], phase = 1, phaseAt = 0, burst = false;
+  const rollObj = { u: 0 };
+  function bez(t, a, b, c) { const it = 1 - t; return it * it * a + 2 * it * t * b + t * t * c; }
+  function setDropAt(u) { S.drop.position.set(bez(u, ROLL.x0, ROLL.x1, ROLL.x2), bez(u, ROLL.y0, ROLL.y1, ROLL.y2)); S.drop.scale.set(S.drop._base0 * (0.62 + 0.55 * u)); }
 
   function place(sp, x, y, dispW, blend, anchorBottom) {
     sp.anchor.set(.5, anchorBottom ? 1 : .5); sp.position.set(x, y);
@@ -221,7 +225,7 @@
     S.bean      = place(new PIXI.Sprite(T.bean),      150, 210, 74, NR, true);
     S.plant     = place(new PIXI.Sprite(T.plant),     150, 220, 96, NR, true);
     S.leaf      = place(new PIXI.Sprite(T.leaf),      150, 104, 122, NR);
-    S.drop      = place(new PIXI.Sprite(T.drop),      LEAFTIP.x, LEAFTIP.y, 24, NR);
+    S.drop      = place(new PIXI.Sprite(T.drop),      ROLL.x0, ROLL.y0, 24, NR);
 
     layout();
     app.ticker.add(() => tick(Math.min(app.ticker.deltaMS / 1000, .05)));
@@ -265,7 +269,6 @@
       bean:      [ph === 1 ? 1 : 0,                          ph === 1 ? 1 : .55],
       plant:     [(ph === 2 || ph === 3) ? 1 : 0,            ph >= 2 ? 1 : .35],
       leaf:      [ph >= 3 ? 1 : 0,                            ph >= 3 ? 1 : .7],
-      drop:      [ph >= 3 ? .96 : 0,                          1],
       glow:      [ph === 1 ? .5 : ph <= 3 ? .3 : .12,        1],
       particles: [ph === 1 ? .6 : ph === 2 ? .22 : 0,        1]
     };
@@ -275,16 +278,23 @@
       if (window.gsap) { gsap.to(sp, { alpha: al, duration: D, ease: E }); gsap.to(sp.scale, { x: sp._base, y: sp._base, duration: D, ease: 'back.out(1.3)' }); }
       else { sp.alpha = al; sp.scale.set(sp._base); }
     }
-    if (window.gsap) gsap.killTweensOf([S.drop.position, S.ripple, S.ripple.scale]);
-    S.drop.position.set(LEAFTIP.x, LEAFTIP.y);
+    if (window.gsap) gsap.killTweensOf([rollObj, S.drop.position, S.ripple, S.ripple.scale]);
     if (ph !== 4) { S.ripple.alpha = 0; }
-    if (ph === 4) runFinale();
+    // drop: rolls down the leaf in phase 3, falls into the pool in phase 4
+    if (ph < 3) { rollObj.u = 0; S.drop.alpha = 0; setDropAt(0); }
+    else if (ph === 3) {
+      S.drop.alpha = .96; rollObj.u = 0; setDropAt(0);
+      if (window.gsap) gsap.to(rollObj, { u: 1, duration: 2.4, delay: .35, ease: 'power1.inOut', onUpdate: () => setDropAt(rollObj.u) });
+      else setDropAt(1);
+    } else if (ph === 4) { rollObj.u = 1; setDropAt(1); S.drop.alpha = .96; runFinale(); }
   }
 
   function runFinale() {
     if (!window.gsap) { S.drop.alpha = 0; S.ripple.alpha = .7; S.glow.position.set(150, GROUND - 8); S.glow.alpha = .55; return; }
-    S.drop.alpha = .96; S.drop.position.set(LEAFTIP.x, LEAFTIP.y);
-    gsap.to(S.drop.position, { x: 150, y: GROUND - 4, duration: 1.1, delay: .4, ease: 'power2.in', onComplete: () => {
+    S.drop.alpha = .96; setDropAt(1);
+    // tiny surface-tension dangle at the tip, then release and fall
+    gsap.to(S.drop.position, { y: ROLL.y2 + 6, duration: .5, delay: .15, ease: 'power1.in', yoyo: true, repeat: 1 });
+    gsap.to(S.drop.position, { x: 150, y: GROUND - 4, duration: 1.0, delay: .95, ease: 'power2.in', onComplete: () => {
       gsap.to(S.drop, { alpha: 0, duration: .2 });
       // plant/leaf/bean give way
       ['plant','leaf','bean','particles'].forEach(k => gsap.to(S[k], { alpha: 0, duration: .6, delay: .05 }));
