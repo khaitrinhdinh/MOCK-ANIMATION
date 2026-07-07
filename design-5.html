@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Design 05 · Cinematic (Real Assets) — Loading Screen</title>
+<title>Design 05 · Video Phases — Loading Screen</title>
 <style>
   @font-face {
     font-family: 'Noto Sans JP';
@@ -48,10 +48,11 @@
   .cam { position: absolute; inset: 0; z-index: 1; transition: transform 2.8s cubic-bezier(.3,.7,.3,1); transform-origin: 50% 60%; }
   .screen[data-ph="1"] .cam { transform: scale(1.07); transform-origin: 50% 66%; }
   .screen[data-ph="2"] .cam { transform: scale(1.02); transform-origin: 50% 55%; }
-  .screen[data-ph="3"] .cam { transform: scale(1.13); transform-origin: 50% 45%; }
-  .screen[data-ph="4"] .cam { transform: scale(1.0); transform-origin: 50% 58%; }
+  .screen[data-ph="3"] .cam { transform: scale(1.3); transform-origin: 52% 34%; }
+  .screen[data-ph="4"] .cam { transform: scale(1.04); transform-origin: 50% 64%; }
 
-  .stage { position: absolute; inset: 0; }
+  .stage { position: absolute; inset: 0; animation: kenburns 30s ease-in-out infinite alternate; }
+  @keyframes kenburns { 0% { transform: scale(1); } 100% { transform: scale(1.06); } }
   .stage canvas, #grain, .flash { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
   #fxbg { z-index: 0; }
   #fxfg { z-index: 2; }
@@ -64,6 +65,17 @@
   .scrim-top { position: absolute; top: 0; left: 0; right: 0; height: 110px; z-index: 5; pointer-events: none; background: linear-gradient(rgba(9,9,14,.88), rgba(9,9,14,.4) 55%, transparent); }
   .scrim-bot { position: absolute; bottom: 0; left: 0; right: 0; height: 250px; z-index: 5; pointer-events: none; background: linear-gradient(transparent, rgba(9,9,14,.55) 35%, rgba(9,9,14,.94) 78%); }
 
+  .scenes { position: absolute; inset: 0; z-index: 0; }
+  .scenes .pv { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%; opacity: 0; transition: opacity .8s ease; will-change: opacity; }
+  .scenes .pv.on { opacity: 1; }
+  #dust { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+  .fx { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+  .drop-wrap, .ripple-wrap { position: absolute; left: 50%; transform: translateX(-50%); }
+  .drop-wrap { top: 40%; }
+  .ripple-wrap { top: 74%; }
+  .fx-drop { display: block; width: 26px; opacity: 0; filter: drop-shadow(0 0 6px rgba(255,190,80,.6)); }
+  .fx-ripple { display: block; width: 150px; opacity: 0; transform: scale(.4); transform-origin: center; }
+  #grain { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; opacity: .05; mix-blend-mode: soft-light; background-repeat: repeat; }
   .head-hud { position: absolute; top: 16px; left: 0; right: 0; z-index: 6; text-align: center; }
   .phase-label { font-size: .6rem; letter-spacing: .16em; font-weight: 800; color: var(--accent); text-transform: uppercase; min-height: 1em; text-shadow: 0 1px 8px rgba(0,0,0,.8); }
   .head-hud h2 { font-size: 1.05rem; font-weight: 800; margin: .3rem 0 0; text-shadow: 0 1px 10px rgba(0,0,0,.9); }
@@ -109,9 +121,9 @@
 <div class="wrap">
   <a class="back" href="index.html">&larr; All designs</a>
   <header class="lede">
-    <div class="eyebrow">Design 05 · Cinematic — Real Assets</div>
-    <h1>Seed → vine → flower → drop → music sphere</h1>
-    <p>Fragments fly into a seed; it sprouts into a vine; a flower blooms on top; the bloom drips a drop that falls into the pool and rises again as the music sphere — all real PNG sprites in PixiJS, displacement-warped and bloom-lit.</p>
+    <div class="eyebrow">Design 05 · Video Phases</div>
+    <h1>Three phase videos, looped to fit any wait</h1>
+    <p>Four consistent AI-rendered growth scenes cross-fade as the progress climbs, under a slow cinematic push-in, warm dust and a golden drop that falls at the end — the UI floats over a full-bleed film frame.</p>
   </header>
 
   <main class="demo">
@@ -121,10 +133,17 @@
         <div class="screen" id="screen" data-ph="1">
           <div class="cam">
             <div class="stage" id="stage">
-              <canvas id="fxbg" aria-hidden="true"></canvas>
-              <canvas id="fxfg" aria-hidden="true"></canvas>
+              <div class="scenes" id="scenes">
+                <video class="pv" muted playsinline preload="auto" poster="assets/scene1.jpg"><source src="assets/video1.webm" type="video/webm"><source src="assets/video1.mp4" type="video/mp4"></video>
+                <video class="pv" muted playsinline preload="auto" poster="assets/scene3.jpg"><source src="assets/video2.webm" type="video/webm"><source src="assets/video2.mp4" type="video/mp4"></video>
+                <video class="pv" muted playsinline preload="auto" poster="assets/scene4.jpg"><source src="assets/video3.webm" type="video/webm"><source src="assets/video3.mp4" type="video/mp4"></video>
+              </div>
+              <canvas id="dust" aria-hidden="true"></canvas>
+              <div class="fx" aria-hidden="true">
+                <div class="drop-wrap" id="dropWrap"><img class="fx-drop" id="dropImg" src="assets/fx_drop.png" alt=""></div>
+                <div class="ripple-wrap"><img class="fx-ripple" id="rippleImg" src="assets/fx_ripple.png" alt=""></div>
+              </div>
               <div id="grain" aria-hidden="true"></div>
-              <div class="flash" aria-hidden="true"></div>
             </div>
           </div>
           <div class="vignette"></div><div class="scrim-top"></div><div class="scrim-bot"></div>
@@ -134,7 +153,7 @@
           </div>
           <div class="hud">
             <div class="progress-row"><div class="bar"><div class="fill" id="fill"></div></div><div class="pct" id="pct">0%</div></div>
-            <div class="status" id="status">Your memories gather into a seed…</div>
+            <div class="status" id="status">Your memories gather into the bean…</div>
             <ol class="steps">
               <li id="s1" data-state="active"><span class="dot">1</span>Analyzing input</li>
               <li id="s2" data-state=""><span class="dot">2</span>Creating melody</li>
@@ -149,12 +168,12 @@
     <aside class="info">
       <h3>Asset-based pipeline</h3>
       <ul class="tech">
-        <li><strong>Real sprites</strong> — <code>note_ring</code>, <code>lotus</code>, <code>drop</code>, <code>ripple</code>, <code>starburst</code>, <code>beam</code> are PNGs loaded into Pixi, drawn with <code>SCREEN</code> blend so their black backing drops out.</li>
-        <li><strong>Displacement shader</strong> — the <code>flow_energy</code> texture drives a <code>DisplacementFilter</code>, warping the whole scene so it ripples like liquid light.</li>
-        <li><strong>Real bloom</strong> — <code>AdvancedBloomFilter</code> over everything; particles are the <code>spark</code> sprite converging into the seed.</li>
-        <li><strong>GSAP timeline</strong> — each phase tweens sprite alpha/scale with proper easing instead of hand-rolled lerps.</li>
+        <li><strong>One video per phase</strong> — phase 1/2/3 each play a short clip once, tied to the real backend phase, not a fixed timer.</li>
+        <li><strong>Play once, then hold + loop ambient</strong> — when a clip ends before its phase does, the last frame is held and a looping ambient (dust, shimmer, final ripple) keeps it alive — no jarring growth reset.</li>
+        <li><strong>Crossfade on advance</strong> — when the backend moves to the next phase, the next clip cross-fades in.</li>
+        <li><strong>Tiny footprint</strong> — small WebM clips (~1MB total) + a still poster fallback; degrades to the poster image if a clip is missing.</li>
       </ul>
-      <div class="warn"><strong>This is a 1x (low-res) build.</strong> The source sprites are only ~100px, so scaled up they look a little soft. Re-export the atlas at 2x–4x and drop the files into <code>assets/sprites/</code> and it turns crisp instantly — the code stays the same.</div>
+      <div class="warn"><strong>Scaffold ready for your clips.</strong> Until <code>assets/video1/2/3</code> exist it shows the still posters. Each clip: ~3–5s, ends on a calm frame, same framing/background, exported small (WebM 540–720p, ~200–500KB).</div>
       <div class="controls">
         <button id="replay">⟲ Replay</button>
         <button class="chip" data-jump="1">Phase 1</button>
@@ -166,8 +185,6 @@
   </main>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.3/dist/pixi.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pixi-filters@5.3.0/dist/browser/pixi-filters.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script>
 (function () {
@@ -176,204 +193,80 @@
   const fill = document.getElementById('fill'), pct = document.getElementById('pct');
   const statusEl = document.getElementById('status'), phaseLabel = document.getElementById('phaseLabel'), phTitle = document.getElementById('phTitle');
   const steps = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3')];
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const tween = (window.gsap) ? (t, v) => gsap.to(t, v) : (t, v) => { for (const k in v) if (k !== 'duration' && k !== 'ease' && k !== 'onComplete') { if (k.includes('.')) { const [a,b]=k.split('.'); t[a][b]=v[k]; } else t[k]=v[k]; } if (v.onComplete) v.onComplete(); };
+  const vids = Array.prototype.slice.call(document.querySelectorAll('.pv'));   // [v1, v2, v3]
+  const dropWrap = document.getElementById('dropWrap'), dropImg = document.getElementById('dropImg'), rippleImg = document.getElementById('rippleImg');
 
-  const SEED = { x: 150, y: 205 }, FLOWER = { x: 150, y: 112 }, POOL = { x: 150, y: 256 };
-  const A = 'assets/sprites/';
-
-  /* ---- background dust/fog (2D) ---- */
-  const bgC = document.getElementById('fxbg'), b = bgC.getContext('2d');
-  let W = 0, H = 0, s = 1, oy = 0;
-  const stars = [];
-  for (let i = 0; i < 60; i++) stars.push({ fx: Math.random(), fy: Math.random(), r: .4 + Math.random() * 1.1, p: Math.random() * 6.28, sp: .3 + Math.random() * 1.2, d: .00002 + Math.random() * .00008 });
-  function bgResize() {
-    const r = stage.getBoundingClientRect(); if (!r.width || !r.height) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    bgC.width = r.width * dpr; bgC.height = r.height * dpr; b.setTransform(dpr, 0, 0, dpr, 0, 0);
-    W = r.width; H = r.height; s = W / 300; oy = H - W - 158;
-  }
-  function drawBg(t) {
-    b.clearRect(0, 0, W, H); b.globalCompositeOperation = 'lighter';
-    for (let i = 0; i < 4; i++) {
-      const cx = W * (.5 + Math.sin(t * .1 + i * 1.9) * .22), cy = H * (.16 + i * .24) + Math.cos(t * .08 + i) * 22;
-      const g = b.createRadialGradient(cx, cy, 0, cx, cy, W * .35);
-      g.addColorStop(0, i === 1 ? 'rgba(120,80,200,.05)' : 'rgba(245,143,34,.05)'); g.addColorStop(1, 'rgba(0,0,0,0)');
-      b.fillStyle = g; b.fillRect(0, 0, W, H);
-    }
-    for (const st of stars) { st.fx += st.d; if (st.fx > 1) st.fx = 0; const a = .08 + .3 * (0.5 + 0.5 * Math.sin(t * st.sp + st.p)); b.fillStyle = 'rgba(255,220,170,' + a.toFixed(3) + ')'; b.beginPath(); b.arc(st.fx * W, st.fy * H, st.r, 0, 6.28); b.fill(); }
-  }
-  function bgLoop(ms) { if (!W) bgResize(); drawBg(ms / 1000); requestAnimationFrame(bgLoop); }
-
-  function loadTex(url) { return new Promise((res, rej) => { const img = new Image(); img.onload = () => res(PIXI.Texture.from(img)); img.onerror = rej; img.src = url; }); }
-
-  const NAMES = ['seed','sprout','plant','lotus_full','note_ring','starburst','glow_a','drop','ripple','spark_star'];
-  let app, root, sceneC, dispSprite, T = {}, S = {}, parts = [], phase = 1, phaseAt = 0, burst = false, dropTween = null;
-
-  function place(sp, x, y, dispW, blend) {
-    sp.anchor.set(.5); sp.position.set(x, y);
-    sp.scale.set(dispW / sp.texture.width); sp._base0 = sp.scale.x; sp.blendMode = blend == null ? PIXI.BLEND_MODES.SCREEN : blend;
-    sp.alpha = 0; sceneC.addChild(sp); return sp;
+  /* golden dust ambient (always on, keeps a held frame alive) */
+  const dust = document.getElementById('dust'), c = dust.getContext('2d');
+  let W = 0, H = 0; const motes = [];
+  for (let i = 0; i < 34; i++) motes.push({ x: Math.random(), y: Math.random(), r: .5 + Math.random() * 1.6, v: .02 + Math.random() * .05, p: Math.random() * 6.28, s: .5 + Math.random() });
+  function dResize() { const r = stage.getBoundingClientRect(); if (!r.width) return; const dpr = Math.min(devicePixelRatio || 1, 2); dust.width = r.width * dpr; dust.height = r.height * dpr; c.setTransform(dpr, 0, 0, dpr, 0, 0); W = r.width; H = r.height; }
+  function dLoop(ms) {
+    if (!W) dResize();
+    const t = ms / 1000; c.clearRect(0, 0, W, H); c.globalCompositeOperation = 'lighter';
+    for (const m of motes) { m.y -= m.v * .01; if (m.y < -.05) { m.y = 1.05; m.x = Math.random(); } const a = .12 + .28 * (0.5 + 0.5 * Math.sin(t * m.s + m.p)); const x = (m.x + Math.sin(t * .3 + m.p) * .02) * W, y = m.y * H; const g = c.createRadialGradient(x, y, 0, x, y, m.r * 4); g.addColorStop(0, 'rgba(255,205,120,' + a.toFixed(3) + ')'); g.addColorStop(1, 'rgba(255,205,120,0)'); c.fillStyle = g; c.beginPath(); c.arc(x, y, m.r * 4, 0, 6.28); c.fill(); }
+    requestAnimationFrame(dLoop);
   }
 
-  async function init() {
-    if (!window.PIXI) return;
-    bgResize();
-    const texs = await Promise.all(NAMES.map(n => loadTex(A + n + '.png')));
-    NAMES.forEach((n, i) => T[n] = texs[i]);
+  /* film grain */
+  (function () { const g = document.createElement('canvas'); g.width = g.height = 64; const cx = g.getContext('2d'), im = cx.createImageData(64, 64); for (let i = 0; i < im.data.length; i += 4) { const v = 118 + Math.random() * 20 | 0; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; } cx.putImageData(im, 0, 0); document.getElementById('grain').style.backgroundImage = 'url(' + g.toDataURL() + ')'; })();
 
-    app = new PIXI.Application({ view: document.getElementById('fxfg'), backgroundAlpha: 0, antialias: true, autoDensity: true, resolution: Math.min(window.devicePixelRatio || 1, 2), width: W || 300, height: H || 540 });
-    root = new PIXI.Container(); app.stage.addChild(root);
-    sceneC = new PIXI.Container(); root.addChild(sceneC);
-
-    // displacement map from flow-energy
-    const flowTex = await loadTex(A + 'flow_energy.png');
-    flowTex.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
-    dispSprite = new PIXI.Sprite(flowTex); dispSprite.scale.set(2); root.addChild(dispSprite);
-    const disp = new PIXI.filters.DisplacementFilter(dispSprite, 0);
-    disp.padding = 24;
-    sceneC.filters = [disp]; S.disp = disp;
-
-    if (PIXI.filters.AdvancedBloomFilter) {
-      app.stage.filters = [new PIXI.filters.AdvancedBloomFilter({ threshold: .5, bloomScale: .5, brightness: 1, blur: 5, quality: 4 })];
-      app.stage.filterArea = app.renderer.screen;
-    }
-
-    // build sprites
-    S.burst  = place(new PIXI.Sprite(T.starburst),  FLOWER.x, FLOWER.y, 185, PIXI.BLEND_MODES.ADD);
-    S.aura   = place(new PIXI.Sprite(T.glow_a),     150, 196, 66, PIXI.BLEND_MODES.ADD);
-    S.plant  = place(new PIXI.Sprite(T.plant),      150, 256, 74, PIXI.BLEND_MODES.NORMAL); S.plant.anchor.set(.5, 1); S.plant.position.set(150, 256);
-    S.sprout = place(new PIXI.Sprite(T.sprout),     150, 256, 58, PIXI.BLEND_MODES.NORMAL); S.sprout.anchor.set(.5, 1); S.sprout.position.set(150, 256);
-    S.seed   = place(new PIXI.Sprite(T.seed),       SEED.x, SEED.y, 38, PIXI.BLEND_MODES.NORMAL);
-    S.lotus  = place(new PIXI.Sprite(T.lotus_full), FLOWER.x, FLOWER.y, 100, PIXI.BLEND_MODES.NORMAL);
-    S.ripple = place(new PIXI.Sprite(T.ripple),     POOL.x, POOL.y, 120, PIXI.BLEND_MODES.NORMAL);
-    S.drop   = place(new PIXI.Sprite(T.drop),       FLOWER.x, FLOWER.y, 28, PIXI.BLEND_MODES.NORMAL);
-    S.sphere = place(new PIXI.Sprite(T.note_ring),  150, 165, 92, PIXI.BLEND_MODES.NORMAL);
-    layout();
-    app.ticker.add(() => tick(Math.min(app.ticker.deltaMS / 1000, .05)));
-    setScenePhase(1, true);
+  /* ---- phase video controller ---- */
+  let activeVid = -1;
+  function showVideo(idx) {
+    if (idx === activeVid) return;
+    activeVid = idx;
+    vids.forEach((v, i) => {
+      v.classList.toggle('on', i === idx);
+      if (i === idx) { try { v.currentTime = 0; const p = v.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
+      else { try { v.pause(); } catch (e) {} }
+    });
   }
+  // when a clip ends it naturally holds its last frame; the dust ambient keeps it alive.
 
-  function layout() { if (!app || !W) return; if (app.renderer.width / app.renderer.resolution !== W) app.renderer.resize(W, H); root.scale.set(s); root.position.set(0, oy); }
-
-  function spawnSpark() {
-    if (!app || parts.length > 44) return;
-    const sp = new PIXI.Sprite(T.spark_star); sp.anchor.set(.5); sp.blendMode = PIXI.BLEND_MODES.ADD;
-    sceneC.addChild(sp); const o = { sp, a: 1 };
-    if (phase === 1) { o.mode = 'in'; o.ang = Math.random() * 6.28; o.rad = 80 + Math.random() * 90; o.r = .04 + Math.random() * .04; }
-    else if (phase === 2) { o.mode = 'rise'; o.x = 138 + Math.random() * 24; o.y = 240; o.vy = -34 - Math.random() * 28; o.life = 1.6; o.r = .035 + Math.random() * .03; }
-    else { o.mode = 'out'; o.x = FLOWER.x; o.y = FLOWER.y; const an = Math.random() * 6.28; o.vx = Math.cos(an) * 34; o.vy = Math.sin(an) * 34; o.life = 1.3; o.r = .035 + Math.random() * .03; }
-    parts.push(o);
-  }
-
-  function tick(dt) {
-    const t = performance.now() / 1000; layout();
-    // displacement drift
-    if (dispSprite) { dispSprite.x += 30 * dt; dispSprite.y += 12 * dt; }
-    // seed pulse
-    if (S.seed) { const p = 1 + Math.sin(t * 2.4) * .06; S.seed.scale.set(S.seed._base * p); }
-    if (S.aura) S.aura.rotation += dt * .1;
-    if (S.burst && S.burst.alpha > 0) S.burst.rotation += dt * .12;
-
-    // emit
-    let rate = phase === 1 ? 12 : phase === 2 ? 7 : phase >= 3 ? 7 : 0;
-    if (!reduced && Math.random() < dt * rate) spawnSpark();
-    if (phase === 4 && !burst && (t - phaseAt) > 1.9) { burst = true; for (let i = 0; i < 16; i++) { const sp = new PIXI.Sprite(T.spark_star); sp.anchor.set(.5); sp.blendMode = PIXI.BLEND_MODES.ADD; sceneC.addChild(sp); const an = -Math.PI * Math.random(), v = 40 + Math.random() * 60; parts.push({ sp, a: 1, mode: 'splash', x: POOL.x, y: POOL.y, vx: Math.cos(an) * v, vy: Math.sin(an) * v * .6 - 20, life: 1.4, r: .04 + Math.random() * .04 }); } }
-
-    for (let i = parts.length - 1; i >= 0; i--) {
-      const p = parts[i];
-      if (p.mode === 'in') { p.rad -= (34 + (160 - Math.min(p.rad, 160)) * .4) * dt; p.ang += (1 + 40 / (p.rad + 12)) * dt; p.x = SEED.x + Math.cos(p.ang) * p.rad; p.y = SEED.y + Math.sin(p.ang) * p.rad * .85; p.a = p.rad < 12 ? p.rad / 12 : 1; if (p.rad < 5) p.a = 0; }
-      else if (p.mode === 'rise') { p.y += p.vy * dt; p.x += Math.sin(t * 2 + p.y * .1) * 8 * dt; p.life -= dt; p.a = Math.min(Math.max(p.life, 0), 1); }
-      else if (p.mode === 'out') { p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= .97; p.vy *= .97; p.life -= dt; p.a = Math.max(p.life / 1.3, 0); }
-      else if (p.mode === 'splash') { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 90 * dt; p.life -= dt; p.a = Math.max(p.life / 1.4, 0); }
-      if (p.a <= 0) { p.sp.destroy(); parts.splice(i, 1); continue; }
-      p.sp.position.set(p.x, p.y); p.sp.alpha = Math.min(p.a, 1) * .7; p.sp.scale.set(p.r);
-    }
-  }
-
-  // per-object full target state per phase (jumping phases stays consistent)
-  function setScenePhase(ph, instant) {
-    if (!app) return;
-    const D = instant ? 0 : .7, E = 'power2.out';
-    const st = {
-      seed:   [ph === 1 ? 1 : 0,          .85],
-      sprout: [ph === 2 ? 1 : 0,          ph >= 2 ? 1 : .4],
-      plant:  [ph >= 3 ? 1 : 0,           ph >= 3 ? 1 : .5],
-      lotus:  [ph >= 3 ? 1 : 0,           ph >= 3 ? 1 : .5],
-      burst:  [ph >= 3 ? .42 : 0,         1],
-      aura:   [ph === 1 ? .22 : ph <= 3 ? .13 : .08, 1]
-    };
-    for (const k in st) {
-      const sp = S[k]; if (!sp) continue;
-      const [al, scl] = st[k];
-      sp._base = sp._base0 * scl;
-      if (window.gsap) { gsap.to(sp, { alpha: al, duration: D, ease: E }); gsap.to(sp.scale, { x: sp._base, y: sp._base, duration: D, ease: 'back.out(1.4)' }); }
-      else { sp.alpha = al; sp.scale.set(sp._base); }
-    }
-    const dispAmt = ph === 1 ? 5 : ph === 2 ? 6 : ph === 3 ? 3 : 2;
-    if (S.disp) { if (window.gsap) gsap.to(S.disp.scale, { x: dispAmt, y: dispAmt, duration: instant ? 0 : 1 }); else S.disp.scale.set(dispAmt); }
-
-    // reset finale objects
-    if (window.gsap) gsap.killTweensOf([S.drop, S.drop.position, S.sphere, S.sphere.position, S.sphere.scale, S.ripple, S.ripple.scale]);
-    S.drop.alpha = 0; S.drop.position.set(FLOWER.x, FLOWER.y);
-    S.sphere.alpha = ph === 4 ? S.sphere.alpha : 0; S.sphere._base = S.sphere._base0;
-    if (ph !== 4) { S.sphere.alpha = 0; S.ripple.alpha = 0; }
-    if (ph === 4) runFinale(instant);
-  }
-
-  // finale: flower drips a drop into the pool, then the drop rises and becomes the music sphere
-  function runFinale(instant) {
-    if (!window.gsap) { S.drop.alpha = 0; S.sphere.alpha = 1; S.sphere.position.set(150, 165); S.ripple.alpha = .5; return; }
-    S.drop.alpha = 0; S.drop.position.set(FLOWER.x, FLOWER.y);
-    S.sphere.alpha = 0; S.sphere.position.set(150, POOL.y - 12); S.sphere.scale.set(S.sphere._base0 * .3);
-    gsap.to(S.drop, { alpha: 1, duration: .3, delay: .4 });
-    gsap.to(S.drop.position, { y: POOL.y - 6, duration: 1.1, delay: .5, ease: 'power2.in', onComplete: () => {
-      gsap.to(S.drop, { alpha: 0, duration: .2 });
-      // ripple rings
-      gsap.fromTo(S.ripple, { alpha: .85 }, { alpha: 0, duration: 1.6, repeat: -1, ease: 'power1.out' });
-      gsap.fromTo(S.ripple.scale, { x: S.ripple._base0 * .4, y: S.ripple._base0 * .4 }, { x: S.ripple._base0 * 1.5, y: S.ripple._base0 * 1.5, duration: 1.6, repeat: -1, ease: 'power1.out' });
-      // plant + flower recede, the music sphere rises out of the pool
-      ['plant','lotus','sprout','burst','aura'].forEach(k => gsap.to(S[k], { alpha: 0, duration: .7, delay: .15 }));
-      gsap.to(S.sphere, { alpha: 1, duration: .8, delay: .35 });
-      gsap.to(S.sphere.position, { y: 165, duration: 1.15, delay: .35, ease: 'power2.out' });
-      gsap.to(S.sphere.scale, { x: S.sphere._base0, y: S.sphere._base0, duration: 1.15, delay: .35, ease: 'back.out(1.4)' });
+  /* finale ambient: golden drop + looping ripple over the last held frame */
+  let finaleRun = false;
+  function runFinale() {
+    if (finaleRun) return; finaleRun = true;
+    if (!window.gsap) { rippleImg.style.opacity = .6; return; }
+    gsap.set(dropWrap, { top: '38%' }); gsap.set(dropImg, { opacity: 0 }); gsap.set(rippleImg, { opacity: 0, scale: .4 });
+    gsap.to(dropImg, { opacity: 1, duration: .3, delay: .3 });
+    gsap.to(dropWrap, { top: '72%', duration: 1.15, delay: .5, ease: 'power2.in', onComplete: () => {
+      gsap.to(dropImg, { opacity: 0, duration: .2 });
+      gsap.fromTo(rippleImg, { opacity: .9, scale: .4 }, { opacity: 0, scale: 1.35, duration: 1.8, repeat: -1, ease: 'power1.out', transformOrigin: 'center' });
     } });
   }
+  function resetFinale() { finaleRun = false; if (window.gsap) gsap.killTweensOf([dropWrap, dropImg, rippleImg]); dropImg.style.opacity = 0; rippleImg.style.opacity = 0; }
 
-  /* ---------- driver ---------- */
-  const DUR = 13000, P1 = .34, P2 = .68, P3 = .985;
+  /* ---------- driver (demo timeline; in the app, drive by real backend phase) ---------- */
+  const DUR = 15000, P1 = .34, P2 = .68, P3 = .985;
   const LABELS = {
-    1: ['Phase 1 · Analyze & Nurture', 'Your memories gather into a seed…'],
-    2: ['Phase 2 · Create & Grow', 'The seed sprouts — the melody takes root…'],
-    3: ['Phase 3 · Arrange & Bloom', 'A flower blooms atop the vine…'],
-    4: ['Drop · Your song takes form', 'A drop rises into your song…']
+    1: ['Phase 1 · Analyze & Nurture', 'Your memories settle into the bean…'],
+    2: ['Phase 2 · Create & Grow', 'The bean sprouts — the melody takes root…'],
+    3: ['Phase 3 · Arrange & Drop', 'Leaves unfurl, a golden drop gathers…'],
+    4: ['Drop · Your song is ready', 'The drop falls — your song is ready!']
   };
+  // phase -> which video (phase 4 keeps video3 held + finale)
+  const PH_VID = { 1: 0, 2: 1, 3: 2, 4: 2 };
   let t0 = null, raf = null, curPhase = 0;
   function phaseOf(p) { return p >= P3 ? 4 : p >= P2 ? 3 : p >= P1 ? 2 : 1; }
   function setPhase(ph) {
     if (ph === curPhase) return; curPhase = ph;
-    phase = ph; phaseAt = performance.now() / 1000; if (ph < 4) burst = false;
-    stage.classList.toggle('done', ph === 4);
-    screenEl.dataset.ph = ph;
-    setScenePhase(ph, false);
-    const [label, status] = LABELS[ph]; phaseLabel.textContent = label; statusEl.textContent = status;
-    phTitle.textContent = ph === 4 ? 'Complete! ✨' : 'Creating music…';
-    steps.forEach((li, i) => { const n = i + 1; const state = ph === 4 ? 'done' : n < ph ? 'done' : n === ph ? 'active' : ''; li.dataset.state = state; li.querySelector('.dot').textContent = state === 'done' ? '✓' : String(n); });
+    stage.classList.toggle('done', ph === 4); screenEl.dataset.ph = ph;
+    showVideo(PH_VID[ph]);
+    if (ph === 4) runFinale();
+    const L = LABELS[ph]; phaseLabel.textContent = L[0]; statusEl.textContent = L[1];
+    phTitle.textContent = ph === 4 ? 'Your song is ready!' : 'Creating your song…';
+    steps.forEach((li, i) => { const n = i + 1; const stt = ph === 4 ? 'done' : n < ph ? 'done' : n === ph ? 'active' : ''; li.dataset.state = stt; li.querySelector('.dot').textContent = stt === 'done' ? '\u2713' : String(n); });
   }
   function frame(t) { if (t0 === null) t0 = t; const p = Math.min((t - t0) / DUR, 1); fill.style.width = (p * 100).toFixed(1) + '%'; pct.textContent = Math.round(p * 100) + '%'; setPhase(phaseOf(p)); if (p < 1) raf = requestAnimationFrame(frame); }
-  function startAt(offsetMs) {
-    cancelAnimationFrame(raf); curPhase = 0;
-    for (const p of parts) p.sp.destroy(); parts = []; burst = false;
-    stage.classList.remove('done');
-    if (app) setScenePhase(1, true);
-    t0 = null; raf = requestAnimationFrame(t => { t0 = t - offsetMs; frame(t); });
-  }
+  function startAt(offsetMs) { cancelAnimationFrame(raf); curPhase = 0; activeVid = -1; resetFinale(); stage.classList.remove('done'); t0 = null; raf = requestAnimationFrame(t => { t0 = t - offsetMs; frame(t); }); }
   document.getElementById('replay').addEventListener('click', () => startAt(0));
   document.querySelectorAll('.chip').forEach(btn => btn.addEventListener('click', () => { const k = +btn.dataset.jump; startAt([0, P1 * DUR, P2 * DUR][k - 1]); }));
 
-  requestAnimationFrame(bgLoop);
-  addEventListener('resize', () => { bgResize(); layout(); });
-  init().then(() => startAt(0)).catch(e => { console.error(e); statusEl.textContent = 'Asset load failed — check assets/sprites/'; });
+  requestAnimationFrame(dLoop);
+  addEventListener('resize', dResize);
+  startAt(0);
 })();
 </script>
 </body>
