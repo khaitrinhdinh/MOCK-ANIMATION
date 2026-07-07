@@ -1,0 +1,154 @@
+{
+  "frames": {
+    "bean": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 460,
+        "h": 393
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 460,
+        "h": 393
+      },
+      "sourceSize": {
+        "w": 460,
+        "h": 393
+      }
+    },
+    "plant": {
+      "frame": {
+        "x": 464,
+        "y": 0,
+        "w": 367,
+        "h": 460
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 367,
+        "h": 460
+      },
+      "sourceSize": {
+        "w": 367,
+        "h": 460
+      }
+    },
+    "leaf": {
+      "frame": {
+        "x": 835,
+        "y": 0,
+        "w": 358,
+        "h": 460
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 358,
+        "h": 460
+      },
+      "sourceSize": {
+        "w": 358,
+        "h": 460
+      }
+    },
+    "drop": {
+      "frame": {
+        "x": 1197,
+        "y": 0,
+        "w": 413,
+        "h": 460
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 413,
+        "h": 460
+      },
+      "sourceSize": {
+        "w": 413,
+        "h": 460
+      }
+    },
+    "ripple": {
+      "frame": {
+        "x": 0,
+        "y": 464,
+        "w": 460,
+        "h": 460
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 460,
+        "h": 460
+      },
+      "sourceSize": {
+        "w": 460,
+        "h": 460
+      }
+    },
+    "particles": {
+      "frame": {
+        "x": 464,
+        "y": 464,
+        "w": 460,
+        "h": 459
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 460,
+        "h": 459
+      },
+      "sourceSize": {
+        "w": 460,
+        "h": 459
+      }
+    },
+    "glow": {
+      "frame": {
+        "x": 928,
+        "y": 464,
+        "w": 458,
+        "h": 460
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 458,
+        "h": 460
+      },
+      "sourceSize": {
+        "w": 458,
+        "h": 460
+      }
+    }
+  },
+  "meta": {
+    "app": "custom-packer",
+    "image": "coffee_atlas.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 2048,
+      "h": 928
+    },
+    "scale": "1"
+  }
+}
