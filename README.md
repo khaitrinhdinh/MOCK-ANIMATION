@@ -12,6 +12,7 @@ Loading-screen design concepts for the song-generation flow, built with **pure S
 - `design-5.html` — **Design 05 · Cinematic (Real Assets)**: actual PNG sprites loaded in PixiJS with SCREEN blend, a flow-energy `DisplacementFilter`, `AdvancedBloomFilter` and a GSAP timeline. Assets live in `assets/sprites/` (salvaged + alpha-cut from the delivered sheet; swap in 2x–4x for crisp).
 - `design-6.html` — **Design 06 · Realistic Coffee**: photorealistic coffee bean → sprout → dewy leaf → golden drop, from real 1024px alpha PNGs packed into `coffee_atlas.png` + `coffee_atlas.json`, composited in PixiJS.
 - `design-7.html` — **Design 07 · Cinematic Coffee**: four consistent AI-rendered growth scenes cross-fade with the progress bar under a Ken Burns push-in, warm dust and a golden-drop finale. Pure CSS crossfade + GSAP, no WebGL. Scenes in `assets/scene1-4.jpg`.
+- `design-8.html` — **Design 08 · Video Phases**: player scaffold — one short video per phase (`assets/video1/2/3`), played once then last frame held with looping ambient until the backend advances; falls back to still posters when clips are absent.
 
 ## Run
 
