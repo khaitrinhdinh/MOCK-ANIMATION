@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Water Drop — Full Cycle (asset frames + mesh)</title>
+<title>Water Drop — Full Cycle (5 sequential beats)</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: radial-gradient(700px 460px at 50% 34%, #14140f, #08080a 70%); color: #ededf5;
@@ -17,9 +17,9 @@
 </style>
 </head>
 <body>
-  <h1>💧 Water cycle — real drop frames + mesh jiggle</h1>
+  <h1>💧 fall → pool → splash(+drops) → spread → jiggle</h1>
   <div class="stage"><canvas id="c"></canvas></div>
-  <p>Uses the drop-sheet frames (fall → splash → ripple → resting dome) on a transparent stage; the resting dome is a Pixi mesh whose vertices wobble so it jiggles like real water. No background.</p>
+  <p>Five sequential beats using the drop-sheet frames: the drop falls, pools where it lands, splashes up with flying droplets, spreads out without droplets, then the resting drop jiggles (Pixi mesh). Transparent, no background.</p>
 
 <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.3/dist/pixi.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
@@ -31,82 +31,87 @@
   const app = new PIXI.Application({ view: document.getElementById('c'), backgroundAlpha: 0, antialias: true,
     autoDensity: true, resolution: Math.min(devicePixelRatio || 1, 2), width: r.width, height: r.height });
   function loadTex(url) { return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(PIXI.Texture.from(im)); im.onerror = rej; im.src = url; }); }
-
-  const CX = r.width / 2, GY = r.height * 0.66;   // ground / impact line
-
-  function fit(sp, w) { sp.width = w; sp.scale.y = sp.scale.x; }
+  const CX = r.width / 2, GY = r.height * 0.64;
+  function fit(sp, w) { sp.width = w; sp.scale.y = sp.scale.x; return sp.scale.x; }
 
   (async () => {
     const sheet = await loadTex('assets/image.png');
     const T = {}; for (const k in FR) { const f = FR[k]; T[k] = new PIXI.Texture(sheet.baseTexture, new PIXI.Rectangle(f[0], f[1], f[2], f[3])); }
 
-    // ripple (behind everything)
-    const ripple = new PIXI.Sprite(T.ripple2); ripple.anchor.set(.5, .5); ripple.position.set(CX, GY); ripple.alpha = 0; fit(ripple, 210); app.stage.addChild(ripple);
-    // splash
-    const splash = new PIXI.Sprite(T.splash2); splash.anchor.set(.5, .92); splash.position.set(CX, GY + 4); splash.alpha = 0; fit(splash, 200); app.stage.addChild(splash);
-    // flying beads
-    const beadTex = [T.bead1, T.bead2, T.bead3]; let beads = []; const beadLayer = new PIXI.Container(); app.stage.addChild(beadLayer);
-    // resting dome as a deforming MESH
-    const DW = 150, DH = DW * FR.dome[3] / FR.dome[2], SEG = 16;
+    // layers (back -> front): pool, burst, dome(mesh), splash, beads, fall
+    const pool = new PIXI.Sprite(T.ripple1);  pool.anchor.set(.5); pool.position.set(CX, GY); pool.alpha = 0; const poolS = fit(pool, 180); app.stage.addChild(pool);
+    const burst = new PIXI.Sprite(T.ripple2);  burst.anchor.set(.5); burst.position.set(CX, GY); burst.alpha = 0; const burstS = fit(burst, 200); app.stage.addChild(burst);
+
+    const DW = 148, DH = DW * FR.dome[3] / FR.dome[2], SEG = 16;
     const geo = new PIXI.PlaneGeometry(DW, DH, SEG, SEG);
     const dome = new PIXI.Mesh(geo, new PIXI.MeshMaterial(T.dome));
-    dome.pivot.set(DW / 2, DH); dome.position.set(CX, GY + 6); dome.alpha = 0; app.stage.addChild(dome);
+    dome.pivot.set(DW / 2, DH); dome.position.set(CX, GY + 8); dome.alpha = 0; app.stage.addChild(dome);
     const buf = geo.getBuffer('aVertexPosition'), orig = Float32Array.from(buf.data);
-    // falling teardrop
-    const fall = new PIXI.Sprite(T.fall); fall.anchor.set(.5, .5); fall.alpha = 0; fit(fall, 46); app.stage.addChild(fall);
+
+    const splash = new PIXI.Sprite(T.splash2); splash.anchor.set(.5, .9); splash.position.set(CX, GY + 6); splash.alpha = 0; const splashS = fit(splash, 190); app.stage.addChild(splash);
+    const beadLayer = new PIXI.Container(); app.stage.addChild(beadLayer); let beads = []; const beadTex = [T.bead1, T.bead2, T.bead3];
+    const fall = new PIXI.Sprite(T.fall); fall.anchor.set(.5); fall.alpha = 0; const fallS = fit(fall, 44); app.stage.addChild(fall);
 
     const wob = { amp: 0, sx: 1, sy: 1 };
     app.ticker.add(() => {
       const t = performance.now() / 1000, d = buf.data;
       for (let i = 0; i < d.length; i += 2) {
-        let ox = orig[i] - DW / 2, oy = orig[i + 1] - DH;   // centered x, base at 0
-        // jelly wobble — stronger near the top, none at the base (surface tension)
+        let ox = orig[i] - DW / 2, oy = orig[i + 1] - DH;
         const up = Math.max(0, -oy / DH);
         let x = ox * wob.sx + Math.sin(oy * 0.05 + t * 6) * wob.amp * (0.4 + up);
         let y = oy * wob.sy + Math.sin(ox * 0.06 + t * 5) * wob.amp * 0.5 * up;
         d[i] = x + DW / 2; d[i + 1] = y + DH;
       }
       buf.update();
-      // beads physics
       for (let i = beads.length - 1; i >= 0; i--) {
         const b = beads[i]; b.vy += 520 * 0.016; b.s.x += b.vx * 0.016; b.s.y += b.vy * 0.016; b.life -= 0.016;
         b.s.alpha = Math.min(1, b.life * 3);
-        if (b.life <= 0 || b.s.y > GY + 6) { b.s.destroy(); beads.splice(i, 1); }
+        if (b.life <= 0 || b.s.y > GY + 8) { b.s.destroy(); beads.splice(i, 1); }
       }
     });
 
-    function impact() {
-      // splash crown
-      splash.alpha = 1; splash.texture = Math.random() < .5 ? T.splash2 : T.splash1;
-      gsap.fromTo(splash.scale, { x: splash.scale.x * .5, y: splash.scale.x * .3 }, { x: splash.scale.x, y: splash.scale.x, duration: .3, ease: 'power3.out' });
-      gsap.to(splash, { alpha: 0, duration: .5, delay: .35 });
-      // ripple expands
-      ripple.alpha = .9; gsap.fromTo(ripple.scale, { x: ripple.scale.x * .35, y: ripple.scale.x * .35 }, { x: ripple.scale.x * 1.25, y: ripple.scale.x * 1.25, duration: 1.4, ease: 'power1.out' });
-      gsap.to(ripple, { alpha: 0, duration: 1.2, delay: .3 });
-      // beads fly out
-      for (let i = 0; i < 10; i++) { const s = new PIXI.Sprite(beadTex[i % 3]); s.anchor.set(.5); fit(s, 9 + Math.random() * 8); s.position.set(CX + (Math.random() * 30 - 15), GY - 6); beadLayer.addChild(s);
-        const an = -Math.PI / 2 + (Math.random() - .5) * 2.0, v = 110 + Math.random() * 150; beads.push({ s, vx: Math.cos(an) * v, vy: Math.sin(an) * v, life: .55 + Math.random() * .45 }); }
+    function spawnBeads() {
+      for (let i = 0; i < 11; i++) { const s = new PIXI.Sprite(beadTex[i % 3]); s.anchor.set(.5); fit(s, 8 + Math.random() * 8); s.position.set(CX + (Math.random() * 34 - 17), GY - 8); beadLayer.addChild(s);
+        const an = -Math.PI / 2 + (Math.random() - .5) * 1.9, v = 120 + Math.random() * 160; beads.push({ s, vx: Math.cos(an) * v, vy: Math.sin(an) * v, life: .55 + Math.random() * .5 }); }
     }
 
     function play() {
-      // reset
-      fall.alpha = 0; splash.alpha = 0; ripple.alpha = 0; dome.alpha = 0;
-      wob.amp = 0; wob.sx = 1; wob.sy = 1;
+      pool.alpha = 0; burst.alpha = 0; dome.alpha = 0; splash.alpha = 0; fall.alpha = 0;
+      wob.amp = 0; wob.sx = 1; wob.sy = 1; dome.scale.set(1);
       const tl = gsap.timeline({ onComplete: () => gsap.delayedCall(0.5, play) });
-      // 1) teardrop falls, stretching
-      tl.set(fall, { alpha: 1 }); tl.set(fall.position, { x: CX, y: 40 }); tl.set(fall.scale, { y: fall.scale.x * 0.8 });
-      tl.to(fall.position, { y: GY - 4, duration: 0.62, ease: 'power2.in' });
-      tl.to(fall.scale, { y: fall.scale.x * 1.25, duration: 0.62, ease: 'power2.in' }, '<');
-      // 2) impact
+
+      // ── 1. FALL ──
+      tl.set(fall, { alpha: 1 }); tl.set(fall.position, { x: CX, y: 46 }); tl.set(fall.scale, { y: fallS * 0.8 });
+      tl.to(fall.position, { y: GY - 6, duration: 0.6, ease: 'power2.in' });
+      tl.to(fall.scale, { y: fallS * 1.3, duration: 0.6, ease: 'power2.in' }, '<');
       tl.set(fall, { alpha: 0 });
-      tl.add(impact);
-      // 3) resting dome forms and jiggles (mesh)
-      tl.set(dome, { alpha: 1 }); tl.set(wob, { sx: 1.3, sy: 0.55, amp: 3 });      // squashed splat
-      tl.to(wob, { sx: 1, sy: 1, amp: 1.6, duration: 0.9, ease: 'elastic.out(1,.45)' }, '+=0.05');
-      tl.to(wob, { amp: 0.7, duration: 1.4 });                                      // settle to a gentle jiggle
-      // 4) release — dome shrinks away before the next drop
-      tl.to(dome.scale, { x: 1, y: 1, duration: 0.01 });
-      tl.to(dome, { alpha: 0, duration: 0.5 }, '+=0.4');
+
+      // ── 2. POOL (đọng lại) ──
+      tl.set(pool.scale, { x: poolS * .5, y: poolS * .5 });
+      tl.set(pool, { alpha: .9 });
+      tl.to(pool.scale, { x: poolS, y: poolS, duration: 0.4, ease: 'power2.out' });
+      tl.to({}, { duration: 0.25 });
+
+      // ── 3. SPLASH WITH DROPLETS (văng có giọt) ──
+      tl.set(splash, { alpha: 1 }); tl.set(splash.scale, { x: splashS * .55, y: splashS * .3 });
+      tl.add(spawnBeads);
+      tl.to(splash.scale, { x: splashS, y: splashS, duration: 0.32, ease: 'power3.out' });
+      tl.to(splash, { alpha: 0, duration: 0.45, delay: 0.1 });
+      tl.to({}, { duration: 0.35 });
+
+      // ── 4. SPREAD, NO DROPLETS (văng không giọt) ──
+      tl.set(burst, { alpha: .9 }); tl.set(burst.scale, { x: burstS * .4, y: burstS * .4 });
+      tl.to(burst.scale, { x: burstS * 1.25, y: burstS * 1.25, duration: 0.9, ease: 'power1.out' });
+      tl.to(burst, { alpha: 0, duration: 0.8, delay: 0.1 }, '<');
+      tl.to(pool, { alpha: 0, duration: 0.6 }, '<');
+
+      // ── 5. JIGGLE (rung rinh) ──
+      tl.set(dome, { alpha: 1 }); tl.set(wob, { sx: 1.28, sy: 0.6, amp: 3 }); tl.set(dome.scale, { x: 1, y: 1 });
+      tl.to(dome, { alpha: 1, duration: 0.3 }, '<');
+      tl.to(wob, { sx: 1, sy: 1, amp: 1.8, duration: 0.9, ease: 'elastic.out(1,.45)' });
+      tl.to(wob, { amp: 0.7, duration: 1.5, ease: 'power1.out' });
+      // release
+      tl.to(dome, { alpha: 0, duration: 0.5 }, '+=0.3');
     }
     play();
   })();
