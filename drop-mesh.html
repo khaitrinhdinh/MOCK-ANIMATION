@@ -3,107 +3,142 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Water Drop — Mesh Deform (Level 3)</title>
+<title>Water Drop — Refraction Shader (Level 3.5)</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: radial-gradient(800px 500px at 50% 30%, #14101a, #09090e 70%); color: #ededf5;
     font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif; min-height: 100vh;
     display: grid; place-items: center; gap: 1rem; padding: 2rem; }
   h1 { font-size: 1.05rem; font-weight: 800; color: #FFBB57; }
-  p { font-size: .82rem; color: rgba(237,237,245,.55); max-width: 42ch; text-align: center; }
-  .stage { position: relative; width: 320px; height: 400px; border-radius: 20px; overflow: hidden;
-    background: #0b0b12; border: 1px solid rgba(255,255,255,.08); }
+  p { font-size: .82rem; color: rgba(237,237,245,.55); max-width: 46ch; text-align: center; }
+  .stage { position: relative; width: 340px; height: 440px; border-radius: 20px; overflow: hidden;
+    background: #000; border: 1px solid rgba(255,255,255,.08); }
   canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 </style>
 </head>
 <body>
-  <h1>💧 Mesh Deform — one drop, real water</h1>
+  <h1>💧 Real water — refraction shader + mesh deform</h1>
   <div class="stage"><canvas id="c"></canvas></div>
-  <p>A single procedural drop texture on a Pixi mesh; its vertices are displaced every frame — surface-tension wobble + a squash → teardrop → squash morph cycle. No sprite frames.</p>
+  <p>A clear water drop on a leaf: a custom GLSL shader bends the leaf behind it (refraction), adds a Fresnel rim and a sliding specular highlight; the mesh wobbles and squashes underneath. No gold, no baked highlight.</p>
 
 <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.3/dist/pixi.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script>
 (function () {
   const stage = document.querySelector('.stage');
-
-  // ---- procedural glossy gold drop texture (clean, so nothing mismatches) ----
-  function dropTexture() {
-    const S = 256, o = document.createElement('canvas'); o.width = o.height = S;
-    const x = o.getContext('2d'), cx = S / 2, cy = S / 2, R = S * 0.4;
-    const g = x.createRadialGradient(cx - R * .3, cy - R * .4, R * .1, cx, cy, R);
-    g.addColorStop(0, '#fff6df'); g.addColorStop(.35, '#FFBB57'); g.addColorStop(.8, '#F58F22'); g.addColorStop(1, '#b96e12');
-    x.fillStyle = g; x.beginPath(); x.arc(cx, cy, R, 0, 6.28); x.fill();
-    // rim shade
-    x.globalCompositeOperation = 'multiply';
-    const r2 = x.createRadialGradient(cx, cy, R * .6, cx, cy, R);
-    r2.addColorStop(0, 'rgba(255,255,255,1)'); r2.addColorStop(1, 'rgba(150,90,20,1)');
-    x.fillStyle = r2; x.beginPath(); x.arc(cx, cy, R, 0, 6.28); x.fill();
-    x.globalCompositeOperation = 'source-over';
-    // specular highlight
-    x.fillStyle = 'rgba(255,255,255,.85)'; x.beginPath(); x.ellipse(cx - R * .32, cy - R * .38, R * .18, R * .12, -0.5, 0, 6.28); x.fill();
-    x.fillStyle = 'rgba(255,255,255,.35)'; x.beginPath(); x.arc(cx + R * .25, cy + R * .3, R * .1, 0, 6.28); x.fill();
-    return PIXI.Texture.from(o);
-  }
-
   const r = stage.getBoundingClientRect();
-  const app = new PIXI.Application({ view: document.getElementById('c'), backgroundAlpha: 0, antialias: true,
-    autoDensity: true, resolution: Math.min(devicePixelRatio || 1, 2), width: r.width, height: r.height });
+  const app = new PIXI.Application({ view: document.getElementById('c'), backgroundAlpha: 1, background: 0x0b0b12,
+    antialias: true, autoDensity: true, resolution: Math.min(devicePixelRatio || 1, 2), width: r.width, height: r.height });
 
-  if (PIXI.filters.AdvancedBloomFilter) app.stage.filters = [new PIXI.filters.AdvancedBloomFilter({ threshold: .6, bloomScale: .35, blur: 4, quality: 4 })];
+  function loadTex(url) { return new Promise((res, rej) => { const im = new Image(); im.crossOrigin = 'anonymous'; im.onload = () => res(PIXI.Texture.from(im)); im.onerror = rej; im.src = url; }); }
 
-  const SIZE = 150, SEG = 18;
-  const geo = new PIXI.PlaneGeometry(SIZE, SIZE, SEG, SEG);
-  const mesh = new PIXI.Mesh(geo, new PIXI.MeshMaterial(dropTexture()));
-  mesh.pivot.set(SIZE / 2, SIZE / 2);
-  mesh.position.set(r.width / 2, r.height * 0.46);
-  app.stage.addChild(mesh);
+  const vert = `
+    attribute vec2 aVertexPosition;
+    attribute vec2 aTextureCoord;
+    uniform mat3 projectionMatrix, translationMatrix;
+    varying vec2 vUv;
+    varying vec2 vScreen;
+    void main(){
+      vUv = aTextureCoord;
+      vec3 p = projectionMatrix * translationMatrix * vec3(aVertexPosition, 1.0);
+      gl_Position = vec4(p.xy, 0.0, 1.0);
+      vScreen = vec2((p.x + 1.0) * 0.5, 1.0 - (p.y + 1.0) * 0.5);
+    }`;
 
-  // soft shadow / ripple under the drop
-  const gShadow = new PIXI.Graphics(); app.stage.addChildAt(gShadow, 0);
+  const frag = `
+    precision mediump float;
+    varying vec2 vUv;
+    varying vec2 vScreen;
+    uniform sampler2D uBg;
+    uniform float uTime;
+    uniform float uRefract;
+    void main(){
+      vec2 c = (vUv - 0.5) * 2.0;         // -1..1
+      float r = length(c);
+      if (r > 1.0) discard;
+      float z = sqrt(max(0.0, 1.0 - r*r));           // sphere height
+      vec3 N = normalize(vec3(c, z));                // surface normal
+      // refraction: bend the background behind the drop, slight lens magnify
+      vec2 refr = vScreen + N.xy * uRefract * (0.5 + 0.5 * (1.0 - z)) - (vScreen - 0.5) * 0.05 * z;
+      vec3 bg = texture2D(uBg, refr).rgb;
+      // Fresnel bright rim
+      float fres = pow(1.0 - z, 2.6);
+      // specular hotspot (moving light) — computed, not baked, so it slides
+      vec3 L = normalize(vec3(0.45 + 0.12 * sin(uTime * 0.6), -0.6, 0.75));
+      float spec = pow(max(dot(reflect(-L, N), vec3(0.0, 0.0, 1.0)), 0.0), 60.0);
+      float spec2 = pow(max(dot(reflect(-L, N), vec3(0.0, 0.0, 1.0)), 0.0), 12.0);
+      vec3 col = bg * (0.92 + 0.12 * z);             // slight darken at rim, brighten center
+      col = mix(col, vec3(0.85, 0.93, 1.0), fres * 0.5);   // cool glassy rim
+      col += spec * 1.6 + spec2 * 0.18;              // sharp + soft highlight
+      float alpha = smoothstep(1.0, 0.92, r);
+      gl_FragColor = vec4(col, alpha);
+    }`;
 
-  const buf = geo.getBuffer('aVertexPosition');
-  const orig = Float32Array.from(buf.data);
-  const H = SIZE / 2;
+  (async () => {
+    let bgTex;
+    try { bgTex = await loadTex('assets/scene3.jpg'); } catch (e) { bgTex = null; }
+    // fallback background if the leaf isn't reachable
+    const bgSprite = new PIXI.Sprite(bgTex || PIXI.Texture.WHITE);
+    // cover the stage
+    const cover = () => { const s = Math.max(r.width / (bgSprite.texture.width || r.width), r.height / (bgSprite.texture.height || r.height)); bgSprite.scale.set(s); bgSprite.position.set((r.width - bgSprite.width) / 2, (r.height - bgSprite.height) / 2); };
+    cover();
+    app.stage.addChild(bgSprite);
 
-  // morph state driven by a GSAP timeline (○ → ⬭ → 💧 → ⬯ → ○)
-  const st = { sx: 1, sy: 1, tear: 0, wob: 1.2, bob: 0 };
-  const tl = gsap.timeline({ repeat: -1 });
-  tl.to(st, { sx: 1.22, sy: 0.82, tear: 0, wob: 2.4, duration: 0.5, ease: 'power2.out' })   // squash wide (impact-ish)
-    .to(st, { sx: 0.82, sy: 1.28, tear: 0.55, wob: 1.6, duration: 0.6, ease: 'power2.inOut' }) // stretch into teardrop
-    .to(st, { sx: 1.05, sy: 0.96, tear: 0.12, wob: 2.0, duration: 0.45, ease: 'power2.out' })  // settle overshoot
-    .to(st, { sx: 1, sy: 1, tear: 0, wob: 1.2, duration: 0.8, ease: 'elastic.out(1,.5)' })     // round + jelly settle
-    .to(st, { duration: 0.7 });                                                                // idle wobble
-  gsap.to(st, { bob: 1, duration: 2.2, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+    // vignette so the drop pops
+    const vg = new PIXI.Graphics(); vg.beginFill(0x000000, .35).drawRect(0, 0, r.width, r.height).endFill();
+    const vgm = new PIXI.Sprite(makeVignette()); vgm.width = r.width; vgm.height = r.height; app.stage.addChild(vgm);
 
-  app.ticker.add(() => {
-    const t = performance.now() / 1000;
-    const d = buf.data;
-    for (let i = 0; i < d.length; i += 2) {
-      let ox = orig[i] - H, oy = orig[i + 1] - H;   // centered coords
-      // teardrop: taper the TOP toward a point
-      const top = Math.max(0, -oy / H);             // 0 center → 1 top
-      let x = ox * (1 - st.tear * top * 0.95);
-      let y = oy - st.tear * top * top * 12;        // pull the tip up a bit
-      // surface-tension jelly wobble
-      x += Math.sin(oy * 0.06 + t * 5.0) * st.wob;
-      y += Math.sin(ox * 0.06 + t * 4.2) * st.wob * 0.6;
-      // squash / stretch
-      x *= st.sx; y *= st.sy;
-      d[i] = x + H; d[i + 1] = y + H;
-    }
-    buf.update();
-    mesh.y = r.height * 0.46 + st.bob * 6;
+    const uBg = bgTex || bgSprite.texture;
 
-    // shadow follows the squash (wider when squashed)
-    gShadow.clear();
-    gShadow.beginFill(0x000000, .35);
-    gShadow.drawEllipse(r.width / 2, r.height * 0.46 + 78, 46 * st.sx, 9 / st.sy);
-    gShadow.endFill();
-    gShadow.beginFill(0xF58F22, .12);
-    gShadow.drawEllipse(r.width / 2, r.height * 0.46 + 78, 40 * st.sx, 7 / st.sy);
-    gShadow.endFill();
-  });
+    const SIZE = 168, SEG = 20;
+    const geo = new PIXI.PlaneGeometry(SIZE, SIZE, SEG, SEG);
+    const uniforms = { uBg, uTime: 0, uRefract: 0.11 };
+    const shader = PIXI.Shader.from(vert, frag, uniforms);
+    const mesh = new PIXI.Mesh(geo, shader);
+    mesh.pivot.set(SIZE / 2, SIZE / 2);
+    mesh.position.set(r.width / 2, r.height * 0.5);
+    app.stage.addChild(mesh);
+
+    const buf = geo.getBuffer('aVertexPosition');
+    const orig = Float32Array.from(buf.data);
+    const H = SIZE / 2;
+
+    const st = { sx: 1, sy: 1, tear: 0, wob: 1.0, bob: 0 };
+    gsap.timeline({ repeat: -1 })
+      .to(st, { sx: 1.2, sy: 0.84, tear: 0, wob: 2.0, duration: 0.5, ease: 'power2.out' })
+      .to(st, { sx: 0.86, sy: 1.22, tear: 0.4, wob: 1.4, duration: 0.6, ease: 'power2.inOut' })
+      .to(st, { sx: 1.04, sy: 0.97, tear: 0.1, wob: 1.7, duration: 0.45, ease: 'power2.out' })
+      .to(st, { sx: 1, sy: 1, tear: 0, wob: 1.0, duration: 0.9, ease: 'elastic.out(1,.5)' })
+      .to(st, { duration: 0.8 });
+    gsap.to(st, { bob: 1, duration: 2.4, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+
+    app.ticker.add(() => {
+      const t = performance.now() / 1000;
+      uniforms.uTime = t;
+      const d = buf.data;
+      for (let i = 0; i < d.length; i += 2) {
+        let ox = orig[i] - H, oy = orig[i + 1] - H;
+        const top = Math.max(0, -oy / H);
+        let x = ox * (1 - st.tear * top * 0.9);
+        let y = oy - st.tear * top * top * 12;
+        x += Math.sin(oy * 0.06 + t * 5.0) * st.wob;
+        y += Math.sin(ox * 0.06 + t * 4.2) * st.wob * 0.6;
+        x *= st.sx; y *= st.sy;
+        d[i] = x + H; d[i + 1] = y + H;
+      }
+      buf.update();
+      mesh.y = r.height * 0.5 + st.bob * 6;
+    });
+
+    addEventListener('resize', () => {});
+  })();
+
+  function makeVignette() {
+    const S = 256, o = document.createElement('canvas'); o.width = o.height = S; const x = o.getContext('2d');
+    const g = x.createRadialGradient(S / 2, S / 2, S * 0.32, S / 2, S / 2, S * 0.62);
+    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.6)');
+    x.fillStyle = g; x.fillRect(0, 0, S, S); return PIXI.Texture.from(o);
+  }
 })();
 </script>
 </body>
