@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dew Drop — Roll Down the Leaf</title>
+<title>Dew Drop — Roll Down the Living Leaf</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: radial-gradient(760px 520px at 50% 34%, #14140d, #08080a 72%); color: #ededf5;
@@ -21,12 +21,12 @@
 </style>
 </head>
 <body>
-  <h1>💧 Dew drop rolls down the leaf</h1>
+  <h1>💧 Dew drop rolls down a living leaf</h1>
   <div class="stage">
     <canvas id="c"></canvas>
     <div class="phase">Analyze &amp; Nurture</div>
   </div>
-  <p>A golden dew drop forms near the base, rolls down the leaf's central vein squashing with speed, hangs and stretches at the tip, then detaches and drips into a spreading ripple. Leaf + drop + ripple are keyed live from the Stage-6 asset pack.</p>
+  <p>The leaf gently tilts and breathes (10 keyed tilt frames, ping-ponged) while a golden dew drop rides its central vein — rolling, hanging, stretching, then dripping into a spreading ripple. Leaf + drop + ripple keyed live from the Stage-6 pack.</p>
 
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script>
@@ -36,26 +36,31 @@
   cv.width = W * DPR; cv.height = H * DPR;
   const ctx = cv.getContext('2d'); ctx.scale(DPR, DPR);
 
-  // leaf placement
-  const LSC = 2.0, LW0 = 140, LH0 = 132;
-  const LW = LW0 * LSC, LH = LH0 * LSC;
-  const LX = 175 - LW / 2, LY = 205 - LH / 2;         // top-left of leaf draw
-  // drop roll path down the central vein (tip at top-right -> base at lower-left), stage coords
-  const CP = [{x:262,y:104},{x:214,y:166},{x:174,y:214},{x:134,y:256}];
-  const TIP = CP[3];
-  const LAND = { x: 134, y: 404 };                    // where the fallen drop lands
-  function bez(t) { const u = 1 - t;
-    const a = u*u*u, b = 3*u*u*t, c = 3*u*t*t, d = t*t*t;
-    return { x: a*CP[0].x + b*CP[1].x + c*CP[2].x + d*CP[3].x,
-             y: a*CP[0].y + b*CP[1].y + c*CP[2].y + d*CP[3].y }; }
+  // living leaf: 10 tilt frames in one strip, each cell 150x112, leaf anchored at (75,58)
+  const FN = 10, CW = 150, CH = 112, AX = 75, AY = 58;
+  const LCx = 172, LCy = 196, SC = 1.95, BASE_A = 0.42;   // placement + downward tilt
+  // drop roll path down the vein, in leaf-cell coords (base -> tip)
+  const VEIN = [{x:44,y:52},{x:72,y:55},{x:100,y:57},{x:127,y:59}];
+  const TIPC = { x: 130, y: 59 };
 
-  const imgs = {}; let loaded = 0; const names = ['leaf_hero','drop','drop_stretch','ripple_gold'];
+  let leafA = BASE_A;                                      // current leaf angle (base + sway)
+  function xf(cx, cy) {                                    // leaf-cell -> screen (shared by leaf & drop)
+    const rx = SC * (cx - AX), ry = SC * (cy - AY), c = Math.cos(leafA), s = Math.sin(leafA);
+    return { x: LCx + rx * c - ry * s, y: LCy + rx * s + ry * c };
+  }
+  function bez(t) { const u = 1 - t, a=u*u*u, b=3*u*u*t, c=3*u*t*t, d=t*t*t;
+    return { x: a*VEIN[0].x + b*VEIN[1].x + c*VEIN[2].x + d*VEIN[3].x,
+             y: a*VEIN[0].y + b*VEIN[1].y + c*VEIN[2].y + d*VEIN[3].y }; }
+
+  const imgs = {}; let loaded = 0; const names = ['leaf_tilt','drop','drop_stretch','ripple_gold'];
   names.forEach(n => { const im = new Image(); im.onload = () => { if (++loaded === names.length) start(); };
     im.src = 'assets/' + n + '.png'; imgs[n] = im; });
 
-  const st = { p: 0, dropA: 0, grow: 0.5, stretch: 0, fallY: 0, fallA: 0, rip: 0, ripA: 0 };
+  const st = { p: 0, dropA: 0, grow: 0.7, stretch: 0, fallY: 0, fallA: 0, rip: 0, ripA: 0, leafT: 0 };
   const trail = [], beads = [], motes = [];
   for (let i = 0; i < 16; i++) motes.push(reseed({}, true));
+  const LAND = { x: 0, y: 0 };                             // set when the drop detaches
+  let detach = { x: LCx, y: LCy };
 
   function reseed(m, init) { m.x = 40 + Math.random() * 260; m.y = init ? Math.random() * H : H + 10;
     m.vy = 0.2 + Math.random() * 0.5; m.r = 0.6 + Math.random() * 1.6; m.a = 0.2 + Math.random() * 0.4;
@@ -63,17 +68,19 @@
 
   function draw() {
     const t = performance.now() / 1000;
+    // leaf sway drives the shared transform; the drop rides it
+    leafA = BASE_A + Math.sin(t * 0.8) * 0.035;
     ctx.clearRect(0, 0, W, H);
 
     // subsurface glow behind the leaf
-    const gg = ctx.createRadialGradient(175, 205, 20, 175, 205, 170);
+    const gg = ctx.createRadialGradient(LCx, LCy, 20, LCx, LCy, 170);
     gg.addColorStop(0, 'rgba(180,200,40,0.10)'); gg.addColorStop(1, 'rgba(120,150,20,0)');
     ctx.fillStyle = gg; ctx.fillRect(0, 0, W, H);
 
-    // leaf, gentle sway
-    const sway = Math.sin(t * 0.7) * 0.012;
-    ctx.save(); ctx.translate(175, 205); ctx.rotate(sway);
-    ctx.drawImage(imgs.leaf_hero, -LW / 2, -LH / 2, LW, LH);
+    // the living leaf — ping-pong tilt frame, drawn with the shared transform
+    const fi = Math.round(st.leafT) % FN;
+    ctx.save(); ctx.translate(LCx, LCy); ctx.rotate(leafA); ctx.scale(SC, SC);
+    ctx.drawImage(imgs.leaf_tilt, fi * CW, 0, CW, CH, -AX, -AY, CW, CH);
     ctx.restore();
 
     // wet trail behind the drop
@@ -84,38 +91,38 @@
       ctx.beginPath(); ctx.arc(w.x, w.y, w.r, 0, 7); ctx.fill(); }
     ctx.globalCompositeOperation = 'source-over';
 
-    // the rolling drop
+    // rolling drop, glued to the leaf vein
     if (st.dropA > 0) {
-      const pos = bez(st.p);
-      const pos2 = bez(Math.min(1, st.p + 0.01));
-      const ang = Math.atan2(pos2.y - pos.y, pos2.x - pos.x);
-      const speed = Math.hypot(pos2.x - pos.x, pos2.y - pos.y);
-      const sq = 1 + Math.min(0.28, speed * 4);           // stretch along motion
+      const c0 = bez(st.p), c1 = bez(Math.min(1, st.p + 0.02));
+      const p0 = xf(c0.x, c0.y), p1 = xf(c1.x, c1.y);
+      const ang = Math.atan2(p1.y - p0.y, p1.x - p0.x);
+      const speed = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+      const sq = 1 + Math.min(0.28, speed * 3);
       const d = imgs.drop, dw = d.width * st.grow, dh = d.height * st.grow;
-      ctx.save(); ctx.translate(pos.x, pos.y); ctx.globalAlpha = st.dropA;
-      // soft contact glow
+      ctx.save(); ctx.translate(p0.x, p0.y); ctx.globalAlpha = st.dropA;
       ctx.globalCompositeOperation = 'lighter';
-      ctx.fillStyle = 'rgba(255,220,120,0.18)';
-      ctx.beginPath(); ctx.arc(0, 0, dw * 0.7, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,220,120,0.12)'; ctx.beginPath(); ctx.arc(0, 0, dw * 0.6, 0, 7); ctx.fill();
       ctx.globalCompositeOperation = 'source-over';
-      ctx.rotate(ang + Math.PI / 2);                       // drop's long axis along path
+      ctx.rotate(ang + Math.PI / 2);
       ctx.drawImage(d, -dw / 2, -dh * sq / 2, dw, dh * sq);
       ctx.restore(); ctx.globalAlpha = 1;
+      if (st.dropA > 0.6 && st.p < 0.99) trail.push({ x: p0.x, y: p0.y, r: dw * 0.32, life: 1 });
+      // keep the live detach point at the tip
+      const tp = xf(TIPC.x, TIPC.y); detach.x = tp.x; detach.y = tp.y;
     }
 
-    // hanging stretch + fall at the tip
+    // hang + stretch + fall
     if (st.stretch > 0 || st.fallA > 0) {
-      const s = imgs.drop_stretch;
-      const g = st.grow * 1.5; const sw = s.width * g, sh = s.height * g * (1 + st.stretch);
+      const s = imgs.drop_stretch, g = st.grow * 1.5, sw = s.width * g, sh = s.height * g * (1 + st.stretch);
       ctx.save(); ctx.globalAlpha = st.fallA > 0 ? st.fallA : 1;
-      ctx.translate(TIP.x, TIP.y + st.fallY);
+      ctx.translate(detach.x, detach.y + st.fallY);
       ctx.drawImage(s, -sw / 2, -sh * 0.15, sw, sh);
       ctx.restore(); ctx.globalAlpha = 1;
     }
 
-    // ripple + beads where it lands
+    // ripple + splash beads
     if (st.ripA > 0) {
-      const rp = imgs.ripple_gold; const rw = rp.width * (0.5 + st.rip * 1.6), rh = rw * rp.height / rp.width;
+      const rp = imgs.ripple_gold, rw = rp.width * (0.5 + st.rip * 1.6), rh = rw * rp.height / rp.width;
       ctx.save(); ctx.globalAlpha = st.ripA; ctx.globalCompositeOperation = 'lighter';
       ctx.drawImage(rp, LAND.x - rw / 2, LAND.y - rh / 2, rw, rh);
       ctx.restore(); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
@@ -125,40 +132,35 @@
       if (b.life <= 0) { beads.splice(i, 1); continue; }
       ctx.fillStyle = `rgba(255,225,140,${Math.min(1, b.life * 2) * 0.9})`;
       ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.fill(); }
-    // motes
     for (const m of motes) { m.y -= m.vy; m.x += Math.sin((t + m.s) * 1.5) * 0.2;
       if (m.y < 40) reseed(m, false);
       ctx.fillStyle = `rgba(255,205,110,${m.a})`; ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, 7); ctx.fill(); }
     ctx.globalCompositeOperation = 'source-over';
-
-    // record trail while rolling
-    if (st.dropA > 0.6 && st.p < 0.99) { const pos = bez(st.p);
-      trail.push({ x: pos.x, y: pos.y, r: imgs.drop.width * st.grow * 0.32, life: 1 }); }
   }
 
   function splash() { for (let i = 0; i < 10; i++) { const an = -Math.PI/2 + (Math.random()-.5)*1.8, v = 2 + Math.random()*4;
     beads.push({ x: LAND.x, y: LAND.y, vx: Math.cos(an)*v, vy: Math.sin(an)*v - 1, r: 1 + Math.random()*2, life: .6 + Math.random()*.5 }); } }
 
   function play() {
-    Object.assign(st, { p: 0, dropA: 0, grow: 0.5, stretch: 0, fallY: 0, fallA: 0, rip: 0, ripA: 0 });
+    Object.assign(st, { p: 0, dropA: 0, grow: 0.7, stretch: 0, fallY: 0, fallA: 0, rip: 0, ripA: 0 });
     trail.length = 0; beads.length = 0;
+    const tp = xf(TIPC.x, TIPC.y); detach.x = tp.x; detach.y = tp.y;
+    // leaf breathes continuously (ping-pong), independent of the drop beats
+    gsap.to(st, { leafT: FN - 1, duration: 3.2, ease: 'sine.inOut', yoyo: true, repeat: -1, overwrite: 'auto' });
+
     gsap.timeline({ onComplete: () => gsap.delayedCall(0.9, play) })
-      // 1) form near the base
-      .to(st, { dropA: 1, grow: 0.72, duration: 0.7, ease: 'power2.out' })
+      .to(st, { dropA: 1, grow: 0.9, duration: 0.7, ease: 'power2.out' })
       .to(st, { duration: 0.4 })
-      // 2) roll down the vein, growing as it gathers
       .to(st, { p: 1, duration: 2.6, ease: 'power1.in' })
-      .to(st, { grow: 1.05, duration: 2.6, ease: 'power1.in' }, '<')
-      // 3) hang at the tip, hide roller, show stretch
+      .to(st, { grow: 1.15, duration: 2.6, ease: 'power1.in' }, '<')
+      .add(() => { LAND.x = detach.x; LAND.y = Math.min(H - 46, detach.y + 150); })
       .set(st, { dropA: 0 })
       .to(st, { stretch: 0.9, duration: 0.6, ease: 'power2.in' })
-      // 4) detach & fall
       .to(st, { fallA: 1, duration: 0.01 })
-      .to(st, { fallY: LAND.y - TIP.y, stretch: 0.35, duration: 0.42, ease: 'power2.in' })
+      .to(st, { fallY: () => LAND.y - detach.y, stretch: 0.35, duration: 0.42, ease: 'power2.in' })
       .to(st, { fallA: 0, duration: 0.12 }, '>-0.04')
       .set(st, { stretch: 0, fallY: 0 })
-      // 5) ripple + splash
-      .add(() => { splash(); })
+      .add(() => splash())
       .fromTo(st, { rip: 0, ripA: 0.95 }, { rip: 1, ripA: 0, duration: 1.4, ease: 'power1.out', immediateRender: false })
       .to({}, { duration: 0.5 });
   }
