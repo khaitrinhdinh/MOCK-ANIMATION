@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Water Drop — Fall & Splash</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: radial-gradient(760px 520px at 50% 30%, #13130e, #08080a 72%); color: #ededf5;
+    font-family: "Noto Sans JP", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    min-height: 100vh; display: grid; place-items: center; gap: 1rem; padding: 2rem; }
+  h1 { font-size: 1.05rem; font-weight: 800; color: #FFBB57; letter-spacing: .02em; }
+  p  { font-size: .82rem; color: rgba(237,237,245,.55); max-width: 46ch; text-align: center; }
+  .stage { position: relative; width: 340px; height: 460px; border-radius: 22px; overflow: hidden;
+    background: linear-gradient(180deg, #0b0d0a 0%, #0a0a09 55%, #0c0e0a 100%);
+    border: 1px solid rgba(255,255,255,.08); box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .phase { position: absolute; left: 0; right: 0; bottom: 22px; text-align: center;
+    font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; font-weight: 700;
+    color: rgba(255,187,87,.85); text-shadow: 0 0 12px rgba(245,143,34,.4); }
+</style>
+</head>
+<body>
+  <h1>💧 Water drop — fall &amp; splash</h1>
+  <div class="stage">
+    <canvas id="c"></canvas>
+    <div class="phase">Arrange &amp; Drop</div>
+  </div>
+  <p>A golden drop falls, hits the surface and bursts into a crown of flying droplets that settles into spreading ripples — the drop-shape, splash and ripple frames from the Stage-6 pack, played as one loop.</p>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+(function () {
+  const W = 340, H = 460, DPR = Math.min(devicePixelRatio || 1, 2);
+  const cv = document.getElementById('c');
+  cv.width = W * DPR; cv.height = H * DPR;
+  const ctx = cv.getContext('2d'); ctx.scale(DPR, DPR);
+
+  const CX = W / 2, SY = 300;                       // impact / water-surface line
+  const SPN = 11, SCW = 210, SCH = 132, SBASE = 126, SPS = 1.3;   // splash strip
+  const imgs = {}; let loaded = 0; const names = ['drop_fall', 'splash_strip'];
+  names.forEach(n => { const im = new Image(); im.onload = () => { if (++loaded === names.length) start(); };
+    im.src = 'assets/' + n + '.png'; imgs[n] = im; });
+
+  const st = { dropY: -80, dropA: 0, stretch: 1, splashF: -1, ripA: 0 };
+  const motes = [];
+  for (let i = 0; i < 14; i++) motes.push(reseed({}, true));
+  function reseed(m, init) { m.x = 40 + Math.random() * 260; m.y = init ? Math.random() * H : H + 10;
+    m.vy = 0.15 + Math.random() * 0.45; m.r = 0.6 + Math.random() * 1.5; m.a = 0.18 + Math.random() * 0.35;
+    m.s = Math.random() * 10; return m; }
+
+  function draw() {
+    const t = performance.now() / 1000;
+    ctx.clearRect(0, 0, W, H);
+
+    // faint water-surface sheen
+    const sg = ctx.createLinearGradient(0, SY - 30, 0, SY + 60);
+    sg.addColorStop(0, 'rgba(150,170,40,0)'); sg.addColorStop(.5, 'rgba(150,170,40,0.05)'); sg.addColorStop(1, 'rgba(150,170,40,0)');
+    ctx.fillStyle = sg; ctx.fillRect(0, SY - 30, W, 90);
+
+    // falling drop, stretching under gravity
+    if (st.dropA > 0) {
+      const d = imgs.drop_fall, dw = d.width * 1.25, dh = d.height * 1.25 * st.stretch;
+      ctx.save(); ctx.globalAlpha = st.dropA; ctx.drawImage(d, CX - dw / 2, st.dropY - dh, dw, dh); ctx.restore();
+    }
+
+    // splash flipbook, bottom-aligned to the surface
+    if (st.splashF >= 0) {
+      const fi = Math.min(SPN - 1, Math.round(st.splashF));
+      ctx.drawImage(imgs.splash_strip, fi * SCW, 0, SCW, SCH, CX - SCW * SPS / 2, SY - SBASE * SPS, SCW * SPS, SCH * SPS);
+    }
+
+    // ambient motes
+    ctx.globalCompositeOperation = 'lighter';
+    for (const m of motes) { m.y -= m.vy; m.x += Math.sin((t + m.s) * 1.5) * 0.2;
+      if (m.y < 40) reseed(m, false);
+      ctx.fillStyle = `rgba(255,205,110,${m.a})`; ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, 7); ctx.fill(); }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function play() {
+    Object.assign(st, { dropY: -80, dropA: 1, stretch: 1, splashF: -1 });
+    gsap.timeline({ onComplete: () => gsap.delayedCall(0.5, play) })
+      // fall, stretching under gravity
+      .to(st, { dropY: SY, duration: 0.72, ease: 'power2.in' })
+      .to(st, { stretch: 1.5, duration: 0.72, ease: 'power2.in' }, '<')
+      // impact: hide drop, play splash -> ripple
+      .set(st, { dropA: 0, splashF: 0 })
+      .to(st, { splashF: SPN - 1, duration: 1.15, ease: 'none' })
+      // hold on the settling ripple
+      .to({}, { duration: 0.7 });
+  }
+  function start() { gsap.ticker.add(draw); play(); }
+})();
+</script>
+</body>
+</html>
