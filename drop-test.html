@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Water Splash — Animation Test</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: radial-gradient(900px 500px at 50% 20%, #14101a, #09090e 70%);
+    color: #ededf5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    min-height: 100vh; display: grid; place-items: center; gap: 1.5rem; padding: 2rem;
+  }
+  h1 { font-size: 1.1rem; font-weight: 800; color: #FFBB57; letter-spacing: .04em; }
+  .row { display: flex; gap: 2.5rem; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+  .cell { text-align: center; }
+  .cap { margin-top: .6rem; font-size: .8rem; color: rgba(237,237,245,.55); }
+
+  .stage {
+    position: relative; width: 300px; height: 380px;
+    border-radius: 20px; overflow: hidden;
+    background: #0b0b12; border: 1px solid rgba(255,255,255,.08);
+  }
+
+  /* the water surface line */
+  .surface { position: absolute; left: 0; right: 0; top: 268px; height: 1px; }
+
+  /* falling drop */
+  .drop {
+    position: absolute; left: 50%; top: 40px; width: 14px; height: 20px;
+    margin-left: -7px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    background: linear-gradient(#bfe6ff, #4aa3e0);
+    box-shadow: 0 0 10px rgba(120,190,255,.5);
+    animation: dropFall 3.4s cubic-bezier(.5,0,.9,.5) infinite;
+  }
+  @keyframes dropFall {
+    0%   { top: 30px;  opacity: 0; transform: scaleY(.7); }
+    6%   { opacity: 1; }
+    26%  { top: 250px; opacity: 1; transform: scaleY(1.3); }
+    30%  { top: 262px; opacity: 0; transform: scaleY(.5); }   /* impact */
+    100% { top: 262px; opacity: 0; }
+  }
+
+  /* the splash image — erupts on impact */
+  .splash {
+    position: absolute; left: 50%; bottom: 92px; width: 180px;
+    transform: translateX(-50%) scale(.2); transform-origin: 50% 100%;
+    opacity: 0; filter: drop-shadow(0 0 12px rgba(120,190,255,.35));
+    animation: splashUp 3.4s cubic-bezier(.2,.9,.3,1) infinite;
+  }
+  @keyframes splashUp {
+    0%,28%   { opacity: 0; transform: translateX(-50%) scale(.2); }
+    34%      { opacity: 1; transform: translateX(-50%) scale(1.08); }   /* erupt */
+    42%      { transform: translateX(-50%) scale(.98); }
+    62%      { opacity: 1; transform: translateX(-50%) scale(1); }
+    82%      { opacity: 0; transform: translateX(-50%) scale(1.02) translateY(6px); } /* settle/fade */
+    100%     { opacity: 0; }
+  }
+
+  /* expanding ripple ring at the surface */
+  .ripple {
+    position: absolute; left: 50%; top: 264px; width: 40px; height: 12px;
+    margin-left: -20px; border: 1.5px solid rgba(150,205,255,.7); border-radius: 50%;
+    opacity: 0; animation: rippleOut 3.4s ease-out infinite;
+  }
+  .ripple.b { animation-delay: .18s; }
+  @keyframes rippleOut {
+    0%,30% { opacity: 0; transform: scale(.3); }
+    34%    { opacity: .8; transform: scale(.5); }
+    60%    { opacity: 0; transform: scale(2.4); }
+    100%   { opacity: 0; }
+  }
+
+  /* GOLD-TINTED variant (matches the app palette) */
+  .gold .drop { background: linear-gradient(#ffe6b0, #F58F22); box-shadow: 0 0 10px rgba(245,143,34,.5); }
+  .gold .splash { filter: drop-shadow(0 0 12px rgba(245,143,34,.5)) sepia(1) saturate(4) hue-rotate(-18deg) brightness(1.05); }
+  .gold .ripple { border-color: rgba(255,187,87,.75); }
+
+  @media (prefers-reduced-motion: reduce) { .drop,.splash,.ripple { animation-iteration-count: 1 !important; } }
+</style>
+</head>
+<body>
+  <h1>💧 Water Splash — animation test</h1>
+  <div class="row">
+    <div class="cell">
+      <div class="stage">
+        <div class="drop"></div>
+        <img class="splash" src="assets/splash.png" alt="">
+        <div class="ripple"></div><div class="ripple b"></div>
+      </div>
+      <div class="cap">Original (blue)</div>
+    </div>
+    <div class="cell gold">
+      <div class="stage">
+        <div class="drop"></div>
+        <img class="splash" src="assets/splash.png" alt="">
+        <div class="ripple"></div><div class="ripple b"></div>
+      </div>
+      <div class="cap">Gold-tinted (app palette)</div>
+    </div>
+  </div>
+</body>
+</html>
