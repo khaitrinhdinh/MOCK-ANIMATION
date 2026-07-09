@@ -53,10 +53,12 @@
   .title { font-size: 1.16rem; font-weight: 800; margin-top: 5px; color: var(--ink); }
 
   .progress-row { display: flex; align-items: center; gap: 12px; padding: 0 26px; margin-top: 16px; }
-  .bar { flex: 1; height: 7px; background: var(--track); border-radius: 99px; overflow: hidden; }
-  .fill { height: 100%; width: 0%; border-radius: 99px; background: linear-gradient(90deg, var(--gold2), var(--gold));
-    box-shadow: 0 0 10px rgba(245,143,34,.6); transition: width .3s ease; }
-  .pct { font-size: .8rem; font-weight: 800; color: #e7d7bd; width: 3.1em; text-align: right; font-variant-numeric: tabular-nums; }
+  .bar { flex: 1; height: 8px; background: var(--track); border-radius: 99px; overflow: hidden; }
+  /* fill reveals a fixed level-gradient: amber (analyze) -> gold (create) -> green (arrange) */
+  .fill { display: block; height: 100%; width: 0%; border-radius: 99px; transition: width .3s ease;
+    background-image: linear-gradient(90deg, #F5701A 0%, #F58F22 22%, #FFBB57 50%, #cdd85b 76%, #8fce6a 100%);
+    background-repeat: no-repeat; background-position: left center; background-size: 100% 100%; }
+  .pct { font-size: .82rem; font-weight: 800; color: #e7d7bd; width: 3.1em; text-align: right; font-variant-numeric: tabular-nums; transition: color .4s; }
   .status { text-align: center; font-size: .82rem; color: var(--dim); margin-top: 10px; min-height: 1.2em; }
   .status .dots::after { content:''; animation: dots 1.4s steps(4,end) infinite; }
   @keyframes dots { 0%{content:''} 25%{content:'·'} 50%{content:'··'} 75%{content:'···'} }
@@ -201,11 +203,24 @@
     if (auto) timer = setTimeout(() => setPhase((cur + 1) % 3, true), DWELL);
   }
 
+  // keep the level-gradient fixed to the track width, so the fill reveals it left->right
+  const barEl = document.querySelector('.bar');
+  function sizeGrad() { fill.style.backgroundSize = barEl.clientWidth + 'px 100%'; }
+  window.addEventListener('resize', sizeGrad); sizeGrad();
+  // colour of the current level: amber -> gold -> green
+  function lvlColor(p) {
+    const a = [245,143,34], g = [255,187,87], G = [143,206,106];
+    const mix = (x, y, t) => x.map((v, i) => Math.round(v + (y[i] - v) * t));
+    const c = p < 50 ? mix(a, g, p / 50) : mix(g, G, (p - 50) / 50);
+    return `rgb(${c[0]},${c[1]},${c[2]})`;
+  }
   function raf() {
     if (cur >= 0) {
       const within = auto ? Math.max(0, Math.min(1, (performance.now() - phaseStart) / DWELL)) : 0.5;
       const p = Math.min(100, ((cur + within) / 3) * 100);
       fill.style.width = p.toFixed(0) + '%'; pct.textContent = p.toFixed(0) + '%';
+      pct.style.color = lvlColor(p);
+      fill.style.boxShadow = '0 0 10px ' + lvlColor(p).replace('rgb', 'rgba').replace(')', ',.5)');
     }
     requestAnimationFrame(raf);
   }
