@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seed of Sounds — Mobile Video Loader</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root { --bg:#08080a; --scr:#0b0c10; --scr2:#0e0f14; --gold:#FFBB57; --gold2:#F58F22;
+    --ink:#f1ece2; --dim:rgba(241,236,226,.55); --track:rgba(255,255,255,.10); --green:#8fce6a; }
+  body { background: radial-gradient(760px 520px at 50% 26%, #14120c, #08080a 70%); color: var(--ink);
+    font-family: "Noto Sans JP", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    min-height: 100vh; display: grid; place-items: center; gap: 1.1rem; padding: 2rem; }
+  h1.pgt { font-size: 1rem; font-weight: 800; color: var(--gold); letter-spacing: .02em; }
+  .lede { font-size: .8rem; color: var(--dim); max-width: 44ch; text-align: center; }
+
+  /* ---------- phone ---------- */
+  .phone { width: 360px; border-radius: 40px; padding: 12px; background: #050506;
+    border: 1px solid #23201a; box-shadow: 0 40px 80px -24px rgba(0,0,0,.7), inset 0 0 0 2px #16130e; }
+  .screen { position: relative; border-radius: 30px; overflow: hidden; height: 720px;
+    background: linear-gradient(180deg, var(--scr) 0%, #0a0b0f 55%, var(--scr2) 100%); }
+  .statusbar { display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 22px 6px; font-size: .72rem; font-weight: 700; color: var(--ink);
+    font-variant-numeric: tabular-nums; }
+  .statusbar .ic { display: flex; align-items: center; gap: 6px; }
+  .bat { width: 22px; height: 11px; border: 1px solid var(--ink); border-radius: 3px; position: relative; padding: 1.5px; }
+  .bat::after { content:''; position:absolute; right:-3px; top:3px; width:2px; height:5px; background:var(--ink); border-radius:0 2px 2px 0; }
+  .bat > i { display:block; height:100%; width:72%; background: var(--gold); border-radius:1px; }
+  .sig { display:flex; align-items:flex-end; gap:2px; }
+  .sig > i { width:3px; background: var(--ink); border-radius:1px; }
+  .sig > i:nth-child(1){height:4px} .sig>i:nth-child(2){height:6px} .sig>i:nth-child(3){height:8px} .sig>i:nth-child(4){height:10px}
+
+  .apphead { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 0 2px; }
+  .apphead .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 12px var(--gold2); }
+  .apphead b { font-size: .68rem; letter-spacing: .22em; text-transform: uppercase; color: #efe2cc; font-weight: 800; }
+
+  /* video hero — black background melts into the screen via screen-blend */
+  .hero { position: relative; height: 300px; margin: 6px 0 0; }
+  .hero video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    mix-blend-mode: screen;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 86%, transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 86%, transparent 100%); }
+  .hero .glow { position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(120px 120px at 50% 46%, rgba(245,160,50,.14), transparent 70%); }
+  .hero .flash { position: absolute; inset: 0; background: var(--scr); opacity: 0; transition: opacity .16s ease; pointer-events: none; }
+
+  .info { padding: 4px 26px 0; text-align: center; }
+  .phase-label { font-size: .62rem; letter-spacing: .2em; text-transform: uppercase; font-weight: 800;
+    color: var(--gold); min-height: 1em; text-shadow: 0 0 12px rgba(245,143,34,.4); transition: opacity .4s; }
+  .title { font-size: 1.18rem; font-weight: 800; margin-top: 5px; color: var(--ink); }
+  .track { margin-top: 6px; font-size: .74rem; color: var(--dim); }
+  .track b { color: #e7d7bd; font-weight: 700; }
+
+  .progress-row { display: flex; align-items: center; gap: 12px; padding: 0 26px; margin-top: 18px; }
+  .bar { flex: 1; height: 7px; background: var(--track); border-radius: 99px; overflow: hidden; }
+  .fill { height: 100%; width: 0%; border-radius: 99px; background: linear-gradient(90deg, var(--gold2), var(--gold));
+    box-shadow: 0 0 10px rgba(245,143,34,.6); transition: width .3s ease; }
+  .pct { font-size: .8rem; font-weight: 800; color: #e7d7bd; width: 3.1em; text-align: right; font-variant-numeric: tabular-nums; }
+  .status { text-align: center; font-size: .82rem; color: var(--dim); margin-top: 10px; min-height: 1.2em; }
+  .status .dots::after { content:''; animation: dots 1.4s steps(4,end) infinite; }
+  @keyframes dots { 0%{content:''} 25%{content:'·'} 50%{content:'··'} 75%{content:'···'} }
+
+  .steps { list-style: none; padding: 0 26px; margin: 16px 0 0; display: grid; gap: 9px; }
+  .steps li { display: flex; align-items: center; gap: 11px; font-size: .82rem; font-weight: 600; color: var(--dim); transition: color .3s; }
+  .steps li .d { width: 21px; height: 21px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    font-size: .6rem; font-weight: 800; border: 2px solid var(--track); color: var(--dim); transition: all .3s; }
+  .steps li[data-s="active"] { color: var(--ink); }
+  .steps li[data-s="active"] .d { background: var(--gold); border-color: var(--gold); color: #201400;
+    animation: pulse 1.4s ease-in-out infinite; }
+  .steps li[data-s="done"] { color: var(--green); }
+  .steps li[data-s="done"] .d { background: var(--green); border-color: var(--green); color: #0c1a06; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,187,87,.45)} 50%{box-shadow:0 0 0 6px rgba(255,187,87,0)} }
+
+  .cancel { margin: 18px 26px 0; text-align: center; }
+  .cancel button { font-family: inherit; font-size: .8rem; font-weight: 700; color: var(--dim);
+    background: transparent; border: 1px solid var(--track); border-radius: 99px; padding: 9px 22px; cursor: pointer; transition: .2s; }
+  .cancel button:hover { color: var(--ink); border-color: rgba(255,187,87,.4); }
+</style>
+</head>
+<body>
+  <h1 class="pgt">📱 Mobile loading screen — real video</h1>
+  <div class="phone">
+    <div class="screen">
+      <div class="statusbar">
+        <span>9:41</span>
+        <span class="ic"><span class="sig"><i></i><i></i><i></i><i></i></span>5G<span class="bat"><i></i></span></span>
+      </div>
+      <div class="apphead"><span class="dot"></span><b>Seed of Sounds</b></div>
+      <div class="hero">
+        <video id="v" poster="assets/cinematic_poster.jpg" muted playsinline preload="auto"></video>
+        <div class="glow"></div>
+        <div class="flash" id="flash"></div>
+      </div>
+      <div class="info">
+        <div class="phase-label" id="phase">Analyze &amp; Nurture</div>
+        <div class="title">Creating your song</div>
+        <div class="track">🎵 <b>Cafe in Bangkok</b> · Yama</div>
+      </div>
+      <div class="progress-row"><div class="bar"><i class="fill" id="fill"></i></div><span class="pct" id="pct">0%</span></div>
+      <div class="status"><span id="statusText">Listening to your idea</span><span class="dots"></span></div>
+      <ul class="steps">
+        <li id="st0" data-s="active"><span class="d">1</span><span>Analyze &amp; nurture the seed</span></li>
+        <li id="st1" data-s="pending"><span class="d">2</span><span>Create &amp; grow the melody</span></li>
+        <li id="st2" data-s="pending"><span class="d">3</span><span>Arrange &amp; drop the track</span></li>
+      </ul>
+      <div class="cancel"><button type="button">Cancel</button></div>
+    </div>
+  </div>
+  <p class="lede">The 3-phase video inside a real mobile loading screen. The clip's black background is dissolved into the app with <code>mix-blend-mode: screen</code>, so the golden seed floats in the UI — no video box. Progress, status and the step checklist track the phases.</p>
+
+<script>
+(function () {
+  const v = document.getElementById('v'), flash = document.getElementById('flash');
+  const phaseEl = document.getElementById('phase'), statusText = document.getElementById('statusText');
+  const fill = document.getElementById('fill'), pct = document.getElementById('pct');
+  const steps = [document.getElementById('st0'), document.getElementById('st1'), document.getElementById('st2')];
+  const P = [
+    { src: 'assets/video1.mp4', name: 'Analyze & Nurture', status: 'Listening to your idea' },
+    { src: 'assets/video2.mp4', name: 'Create & Grow',     status: 'Composing the melody' },
+    { src: 'assets/video3.mp4', name: 'Arrange & Drop',    status: 'Mixing your track' },
+  ];
+  const DWELL = 6000;                // ms per phase (demo). Backend ends each phase for real.
+  let cur = -1, timer = null, seaming = false, phaseStart = 0;
+
+  function seam(fn) { if (seaming) return; seaming = true; flash.style.opacity = 0.9;
+    setTimeout(() => { fn(); flash.style.opacity = 0; setTimeout(() => { seaming = false; }, 160); }, 150); }
+
+  function setPhase(i) {
+    const first = cur < 0; cur = i; phaseStart = performance.now();
+    phaseEl.style.opacity = 0;
+    setTimeout(() => { phaseEl.textContent = P[i].name; statusText.textContent = P[i].status; phaseEl.style.opacity = 1; }, first ? 0 : 200);
+    steps.forEach((el, k) => el.dataset.s = k < i ? 'done' : (k === i ? 'active' : 'pending'));
+    steps.forEach((el, k) => { if (k < i) el.querySelector('.d').textContent = '✓'; else el.querySelector('.d').textContent = k + 1; });
+    const go = () => { v.src = P[i].src; v.load(); v.play().catch(() => {}); };
+    if (first) go(); else seam(go);
+    clearTimeout(timer); timer = setTimeout(() => setPhase((cur + 1) % 3), DWELL);
+  }
+
+  function raf() {
+    if (cur >= 0) {
+      // soft-loop the clip so the phase can wait any length
+      if (!seaming && v.duration && v.currentTime >= v.duration - 0.25)
+        seam(() => { v.currentTime = 0; v.play().catch(() => {}); });
+      // monotonic overall progress across the 3 phases
+      const within = Math.max(0, Math.min(1, (performance.now() - phaseStart) / DWELL));
+      const p = Math.min(100, ((cur + within) / 3) * 100);
+      fill.style.width = p.toFixed(0) + '%'; pct.textContent = p.toFixed(0) + '%';
+    }
+    requestAnimationFrame(raf);
+  }
+  setPhase(0); requestAnimationFrame(raf);
+})();
+</script>
+</body>
+</html>
