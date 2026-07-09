@@ -35,6 +35,10 @@
   .steps > i.done { background: rgba(255,187,87,.55); }
   .steps > i > span { position: absolute; inset: 0; width: 0%; border-radius: 3px;
     background: linear-gradient(90deg, #F58F22, #FFBB57); box-shadow: 0 0 8px rgba(245,143,34,.7); }
+  .steps > i.wait > span { width: 100%;
+    background: linear-gradient(90deg, rgba(245,143,34,.12), #FFBB57 50%, rgba(245,143,34,.12));
+    background-size: 220% 100%; animation: shimmer 1.15s linear infinite; }
+  @keyframes shimmer { from { background-position: 220% 0; } to { background-position: -220% 0; } }
   .phase { font-size: .8rem; letter-spacing: .2em; text-transform: uppercase; font-weight: 800;
     color: #FFCB77; text-shadow: 0 0 14px rgba(245,143,34,.5); transition: opacity .4s; }
   .sub { margin-top: 4px; font-size: .72rem; color: rgba(237,237,245,.6); transition: opacity .4s; }
@@ -55,42 +59,48 @@
       <div class="sub"><span id="subtext">Listening to your idea</span><span class="dots"></span></div>
     </div>
   </div>
-  <p class="lede">The 10-second film is cut into three phase segments; the current phase loops its own clip (with a soft crossfade at the seam) until it's done, then hands off to the next. Here it auto-advances every ~7s to demo all three — in the app, the backend drives the hand-off.</p>
+  <p class="lede">Each phase plays a short intro once, then loops a tight ambient tail (phase 1 keeps the sound-wave swirling around the note) until that phase is done — then it hands off. Here it auto-advances every ~7s to demo; in the app the backend ends each phase.</p>
 
 <script>
 (function () {
   const v = document.getElementById('v'), flash = document.getElementById('flash');
   const phaseEl = document.getElementById('phase'), subEl = document.getElementById('subtext');
   const seg = [document.getElementById('s0'), document.getElementById('s1'), document.getElementById('s2')];
-  // each phase is its own short clip that loops natively (no seeking needed)
+  // each phase = an intro clip (plays once) + a boomerang tail that loops until the phase ends.
+  // the loop clip starts on the intro's last frame, so the hand-off is seamless.
   const P = [
-    { src: 'assets/phase1.mp4', name: 'Analyze & Nurture', sub: 'Listening to your idea' },
-    { src: 'assets/phase2.mp4', name: 'Create & Grow',     sub: 'Composing the melody' },
-    { src: 'assets/phase3.mp4', name: 'Arrange & Drop',    sub: 'Mixing your track' },
+    { in: 'assets/p1_in.mp4', loop: 'assets/p1_loop.mp4', name: 'Analyze & Nurture', sub: 'Listening to your idea' },
+    { in: 'assets/p2_in.mp4', loop: 'assets/p2_loop.mp4', name: 'Create & Grow',     sub: 'Composing the melody' },
+    { in: 'assets/p3_in.mp4', loop: 'assets/p3_loop.mp4', name: 'Arrange & Drop',    sub: 'Mixing your track' },
   ];
-  const DWELL = 7000;                // ms per phase in this auto-demo (the backend drives this for real)
-  let cur = -1, timer = null;
+  const DWELL = 7000;                // ms per phase in this auto-demo (the backend ends each phase for real)
+  let cur = -1, timer = null, looping = false;
+
+  function play(src, loop) { v.src = src; v.loop = loop; v.load(); v.play().catch(() => {}); }
 
   function setPhase(i) {
-    const first = cur < 0; cur = i;
-    // captions + step dots
+    const first = cur < 0; cur = i; looping = false;
     phaseEl.style.opacity = 0; subEl.parentElement.style.opacity = 0;
     setTimeout(() => { phaseEl.textContent = P[i].name; subEl.textContent = P[i].sub;
       phaseEl.style.opacity = 1; subEl.parentElement.style.opacity = 1; }, first ? 0 : 200);
-    seg.forEach((el, k) => { el.classList.toggle('done', k < i);
-      if (k !== i) el.firstElementChild.style.width = k < i ? '100%' : '0%'; });
-    // swap the looping clip behind a soft crossfade
+    seg.forEach((el, k) => { el.classList.toggle('done', k < i); el.classList.remove('wait');
+      el.firstElementChild.style.width = k < i ? '100%' : '0%'; });
+    // start the intro (masked by a brief flash on phase change)
     flash.style.opacity = first ? 0 : 0.85;
-    setTimeout(() => {
-      v.src = P[i].src; v.load(); v.play().catch(() => {});
-      flash.style.opacity = 0;
-    }, first ? 0 : 150);
+    setTimeout(() => { play(P[i].in, false); flash.style.opacity = 0; }, first ? 0 : 150);
     clearTimeout(timer); timer = setTimeout(() => setPhase((cur + 1) % 3), DWELL);
   }
 
-  function bar() {                    // within-phase loop progress
-    if (cur >= 0 && v.duration) seg[cur].firstElementChild.style.width =
-      Math.max(0, Math.min(1, v.currentTime / v.duration)) * 100 + '%';
+  // intro finished -> roll into the ambient tail loop (seamless, no flash)
+  v.addEventListener('ended', () => {
+    if (cur < 0 || looping) return; looping = true;
+    play(P[cur].loop, true);
+    seg[cur].classList.add('wait');
+  });
+
+  function bar() {                    // fill the step during the intro; shimmer handles the loop
+    if (cur >= 0 && !looping && v.duration)
+      seg[cur].firstElementChild.style.width = Math.max(0, Math.min(1, v.currentTime / v.duration)) * 100 + '%';
     requestAnimationFrame(bar);
   }
   setPhase(0); requestAnimationFrame(bar);
