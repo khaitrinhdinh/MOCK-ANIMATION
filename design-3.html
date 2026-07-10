@@ -21,20 +21,6 @@
   <div class="pgt"><small>1Pro Studio · Loading Screen Lab</small><h1>Design 03 — Create Flow · Premium Video Loader</h1></div>
   <main>
     <section><div class="phone"><div class="screen" id="screen"></div></div></section>
-    <aside class="info">
-      <h3>How it's built</h3>
-      <ul>
-        <li><strong>Real create-song flow</strong> — the LIFF wizard: <code>seed → image → mood → vocal → text → confirm</code>, with step dots, chat bubbles and inline options.</li>
-        <li><strong>Fully mocked</strong> — sample seeds &amp; moods, image kept as a local preview only. No upload, no Mureka call; runs on-hand data to test the UI.</li>
-        <li><strong>Premium portrait processing</strong> — a coherent three-beat story (seed charges, sprout grows, dew drop falls &amp; ripples), shown whole with <code>object-fit: contain</code> + screen-blend so the black melts into the app.</li>
-        <li><strong>Compressed to 480p</strong> — the three clips together are ~0.9&nbsp;MB, audio stripped.</li>
-      </ul>
-      <div class="ctrls">
-        <button id="replay">⟲ Restart flow</button>
-        <button id="skip">⏭ Skip to processing</button>
-      </div>
-      <p class="note">Front-end mock of the create page. In the real app the same <code>setStep()</code> machine drives it and the backend fills progress; here a timer stands in.</p>
-    </aside>
   </main>
 
 <script src="createflow.js"></script>
@@ -65,11 +51,6 @@
 
   const loader = makeVideoLoader(['assets/video4.mp4', 'assets/video5.mp4', 'assets/video6.mp4'], 'contain');
   CreateFlow.init({ screen: '#screen', loader });
-  document.getElementById('replay').onclick = () => CreateFlow.reset();
-  document.getElementById('skip').onclick = () => {
-    CreateFlow.selectSeed('acoustic'); CreateFlow.mockImage(); CreateFlow.selectMood('romantic'); CreateFlow.selectVocal('male');
-    CreateFlow._s.step = 'confirm'; CreateFlow.next();
-  };
 </script>
 </body>
 </html>

@@ -76,20 +76,6 @@
   <div class="pgt"><small>1Pro Studio · Loading Screen Lab</small><h1>Design 01 — Create Flow · Drawn Loader</h1></div>
   <main>
     <section><div class="phone"><div class="screen" id="screen"></div></div></section>
-    <aside class="info">
-      <h3>How it's built</h3>
-      <ul>
-        <li><strong>Pick a loading style first</strong> — the original four hand-drawn variants (Classic, Raindrop, Firefly, Bonsai). Your choice plays on the Create step.</li>
-        <li><strong>Real create-song flow</strong> — the LIFF wizard: <code>seed → image → mood → vocal → text → confirm</code>, with step dots, chat bubbles and inline options.</li>
-        <li><strong>Fully mocked</strong> — sample seeds &amp; moods, image kept as a local preview only. No upload, no Mureka call.</li>
-        <li><strong>Original drawn loader on "Create Song"</strong> — the seed pulses, a stem grows leaves, the flower blooms and releases a golden music drop, synced to the three processing steps.</li>
-      </ul>
-      <div class="ctrls">
-        <button id="replay">⟲ Choose again</button>
-        <button id="skip">⏭ Skip to Create</button>
-      </div>
-      <p class="note">Front-end mock of the create page. The drawn animation is the original Design 1 art, shown as the loading screen after you press Create Song.</p>
-    </aside>
   </main>
 
 <script src="createflow.js"></script>
@@ -416,12 +402,6 @@ const SCENES = {
   function startFlow(variant) { currentVariant = variant; CreateFlow.init({ screen: '#screen', loader: drawn(variant) }); }
 
   renderPicker();
-  document.getElementById('replay').onclick = renderPicker;
-  document.getElementById('skip').onclick = () => {
-    startFlow(currentVariant);
-    CreateFlow.selectSeed('lofi'); CreateFlow.mockImage(); CreateFlow.selectMood('calm'); CreateFlow.selectVocal('female');
-    CreateFlow._s.step = 'confirm'; CreateFlow.next();
-  };
 </script>
 </body>
 </html>
