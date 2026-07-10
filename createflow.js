@@ -278,7 +278,7 @@
       const p = Math.min(100, ((performance.now() - t0) / DUR) * 100);
       fill.style.width = p.toFixed(0) + '%'; pct.textContent = p.toFixed(0) + '%';
       setPhase(p >= 66 ? 2 : p >= 33 ? 1 : 0);
-      if (p >= 100) { clearInterval(procTimer); setTimeout(showDone, 500); }
+      if (p >= 100) { clearInterval(procTimer); if (loader && loader.done) loader.done(); setTimeout(showDone, loader && loader.done ? 1600 : 500); }
     }, 80);
   }
 
