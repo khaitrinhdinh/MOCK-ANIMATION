@@ -256,13 +256,10 @@
     }
   }
 
-  // "drop the song" moment before processing — notes fly out + gold flash + word (smooth, no shake)
+  // "drop the song" — just a musical-note burst, then processing (no flash/word)
   function dropAndCreate(btn) {
-    emitNotes(btn, { count: 16, radial: true, dist: 135, size: 22, dur: 1.15, stagger: .3, color: '#FFD98A' });
-    const fx = el('div', 'drop-fx', '<div class="drop-fx__flash"></div><div class="drop-fx__word">DROP!</div>');
-    root.appendChild(fx);
-    requestAnimationFrame(() => fx.classList.add('drop-fx--go'));
-    setTimeout(startProcessing, 1150);
+    emitNotes(btn, { count: 16, radial: true, dist: 135, size: 22, dur: 1.1, stagger: .3, color: '#FFD98A' });
+    setTimeout(startProcessing, 480);
   }
 
   function goNext() {
