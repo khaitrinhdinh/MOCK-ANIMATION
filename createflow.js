@@ -78,6 +78,8 @@
       w.appendChild(el('div', dc, i < cur ? '✓' : String(i + 1)));
       w.appendChild(el('span', 'step-dot-label' + (i === cur ? ' step-dot-label--active' : ''), LABELS[s]));
       if (i < STEPS.length - 1) w.appendChild(el('div', 'step-line' + (i < cur ? ' step-line--done' : '')));
+      // tap a completed step to jump back to it (the only way back — no Back button)
+      if (i < cur) { w.style.cursor = 'pointer'; w.title = 'Back to ' + LABELS[s]; w.onclick = () => goToStep(s); }
       wrap.appendChild(w);
     });
     return wrap;
@@ -210,16 +212,9 @@
       const btn = el('button', 'drop-btn', '<span class="lbl">DROP your Song 🎵</span>');
       btn.onclick = () => dropAndCreate(btn);
       wrap.appendChild(btn);
-      const back = el('button', 'drop-back', 'go back');
-      back.onclick = goBack;
-      wrap.appendChild(back);
       return wrap;
     }
     const row = el('div', 'nav-row');
-    if (idx() > 0) {
-      const back = el('button', 'nav-btn nav-btn--back', '‹ Back');
-      back.onclick = goBack; row.appendChild(back);
-    }
     const last = state.step === 'confirm';
     const next = el('button', 'nav-btn nav-btn--next', last ? 'Create My Song 🎵' : 'Next ›');
     next.disabled = !canProceed();
@@ -271,14 +266,14 @@
     messages.push({ role: 'ai', text: PROMPTS[next], step: next });
     renderFlow();
   }
-  function goBack() {
-    const prev = STEPS[idx() - 1];
-    if (!prev) return;
-    // truncate messages back to prev step's AI prompt
+  // jump back to an earlier (completed) step by tapping its dot
+  function goToStep(target) {
+    const ti = STEPS.indexOf(target);
+    if (ti < 0 || ti >= idx()) return;                    // only navigate backward
     let cut = -1;
-    for (let i = messages.length - 1; i >= 0; i--) if (messages[i].role === 'ai' && messages[i].step === prev) { cut = i; break; }
+    for (let i = messages.length - 1; i >= 0; i--) if (messages[i].role === 'ai' && messages[i].step === target) { cut = i; break; }
     if (cut >= 0) messages = messages.slice(0, cut + 1);
-    state.step = prev;
+    state.step = target;
     renderFlow();
   }
 
@@ -372,6 +367,6 @@
     selectMood: id => { state.mood = MOODS.find(x => x.id === id) || MOODS[0]; renderFlow(); },
     selectVocal: v => { state.vocal = v; renderFlow(); },
     setText: t => { state.text = t; renderFlow(); },
-    next: goNext, back: goBack, reset,
+    next: goNext, goToStep, reset,
   };
 })();
