@@ -398,7 +398,7 @@ const SCENES = {
     });
     body.appendChild(grid); screenEl.appendChild(body);
   }
-  function startFlow(variant) { currentVariant = variant; CreateFlow.init({ screen: '#screen', loader: drawn(variant) }); }
+  function startFlow(variant) { currentVariant = variant; CreateFlow.init({ screen: '#screen', loader: drawn(variant), drama: true }); }
 
   renderPicker();
 </script>

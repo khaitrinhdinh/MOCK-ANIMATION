@@ -33,7 +33,7 @@
   const SAMPLE_IMG = 'data:image/svg+xml;utf8,' + encodeURIComponent(
     "<svg xmlns='http://www.w3.org/2000/svg' width='240' height='180'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23f5a442'/><stop offset='1' stop-color='%23b0623a'/></linearGradient></defs><rect width='240' height='180' fill='url(%23g)'/><circle cx='185' cy='45' r='22' fill='%23ffe6b0'/><path d='M0 150 L70 95 L120 130 L180 80 L240 120 L240 180 L0 180 Z' fill='%23000' opacity='.28'/></svg>");
 
-  let root, loader;
+  let root, loader, dramaMode = false;
   const state = { step: 'seed', screen: 'flow', seed: null, imageUrl: null, mood: null, vocal: null, text: '' };
   let messages = [];
 
@@ -204,6 +204,17 @@
   }
 
   function renderNav() {
+    // final "Drop" step in drama mode: big dramatic DROP button, whisper-quiet Back
+    if (state.step === 'confirm' && dramaMode) {
+      const wrap = el('div', 'drop-nav');
+      const btn = el('button', 'drop-btn', '<span class="lbl">DROP your Song</span>');
+      btn.onclick = dropAndCreate;
+      wrap.appendChild(btn);
+      const back = el('button', 'drop-back', 'go back');
+      back.onclick = goBack;
+      wrap.appendChild(back);
+      return wrap;
+    }
     const row = el('div', 'nav-row');
     if (idx() > 0) {
       const back = el('button', 'nav-btn nav-btn--back', '‹ Back');
@@ -214,6 +225,15 @@
     next.disabled = !canProceed();
     next.onclick = goNext; row.appendChild(next);
     return row;
+  }
+
+  // dramatic "drop the song" moment before processing
+  function dropAndCreate() {
+    root.classList.add('screen--shake');
+    const fx = el('div', 'drop-fx', '<div class="drop-fx__flash"></div><div class="drop-fx__word">DROP!</div>');
+    root.appendChild(fx);
+    requestAnimationFrame(() => fx.classList.add('drop-fx--go'));
+    setTimeout(() => { root.classList.remove('screen--shake'); startProcessing(); }, 1050);
   }
 
   function goNext() {
@@ -316,6 +336,7 @@
     init(opts) {
       root = document.querySelector(opts.screen);
       loader = opts.loader || null;
+      dramaMode = !!opts.drama;
       reset();
     },
     // test helpers (also handy for demos)
