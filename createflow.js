@@ -251,10 +251,34 @@
     }
   }
 
-  // "drop the song" — just a musical-note burst, then processing (no flash/word)
+  // orange "music-staff" vortex that bends and spirals into the button, with notes on it
+  function dropSwirl(btn) {
+    const phone = root.closest('.phone'); if (!phone) return;
+    const pr = phone.getBoundingClientRect(), br = btn.getBoundingClientRect();
+    const cx = br.left - pr.left + br.width / 2, cy = br.top - pr.top + br.height / 2;
+    const SZ = 320, c = SZ / 2, N = 46, R = 128;
+    let lines = '';
+    for (let i = 0; i < N; i++)
+      lines += `<ellipse cx="${c}" cy="${(c - R / 2).toFixed(1)}" rx="${(R * 0.92).toFixed(1)}" ry="${(R / 2).toFixed(1)}" transform="rotate(${(i * 360 / N).toFixed(2)} ${c} ${c})"/>`;
+    let notes = '';
+    const NN = 7;
+    for (let i = 0; i < NN; i++) { const a = (i / NN) * Math.PI * 2, rr = R * 0.8; notes += `<text x="${(c + Math.cos(a) * rr).toFixed(0)}" y="${(c + Math.sin(a) * rr).toFixed(0)}" font-size="17" fill="#FFBB57" stroke="none">${['♪', '♫', '♩'][i % 3]}</text>`; }
+    const wrap = document.createElement('div');
+    wrap.className = 'drop-swirl';
+    wrap.style.left = cx + 'px'; wrap.style.top = cy + 'px';
+    wrap.innerHTML = `<svg width="${SZ}" height="${SZ}" viewBox="0 0 ${SZ} ${SZ}">
+      <defs><radialGradient id="swgr" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#FFE3AE" stop-opacity=".95"/><stop offset="55%" stop-color="#F9A03F" stop-opacity=".7"/><stop offset="100%" stop-color="#F58F22" stop-opacity=".12"/>
+      </radialGradient></defs>
+      <g class="drop-swirl__g"><g fill="none" stroke="url(#swgr)" stroke-width="0.9">${lines}</g>${notes}</g></svg>`;
+    phone.appendChild(wrap);
+    setTimeout(() => wrap.remove(), 1100);
+  }
+
+  // "drop the song" — orange staff-vortex spirals into the button, then processing
   function dropAndCreate(btn) {
-    emitNotes(btn, { count: 16, radial: true, dist: 135, size: 22, dur: 1.1, stagger: .3, color: '#FFD98A' });
-    setTimeout(startProcessing, 480);
+    dropSwirl(btn);
+    setTimeout(startProcessing, 900);
   }
 
   function goNext() {
