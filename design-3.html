@@ -3,250 +3,74 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Seed of Sounds — Premium Video Loader</title>
+<title>Seed of Sounds — Create Flow · Premium Video Loader</title>
+<link rel="stylesheet" href="createflow.css">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  :root { --gold:#FFBB57; --gold2:#F58F22; --green:#8fce6a;
-    --scr:#0b0c10; --card:#12131a; --ink:#f1ece2; --dim:rgba(241,236,226,.55);
-    --track:rgba(255,255,255,.10); --panel-dim:rgba(241,236,226,.6); --panel-text:#efe2cc; }
-  body { background: radial-gradient(760px 520px at 50% 22%, #14120c, #08080a 70%); color: var(--ink);
-    font-family: "Noto Sans JP", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-    min-height: 100vh; padding: 2.4rem 1.5rem; }
-  .pgt { text-align: center; margin-bottom: 1.6rem; }
-  .pgt small { font-size: .68rem; letter-spacing: .24em; text-transform: uppercase; color: var(--gold); font-weight: 800; }
-  .pgt h1 { font-size: 1.35rem; font-weight: 800; color: var(--ink); margin-top: .3rem; }
-
-  main { display: flex; flex-wrap: wrap; gap: 2.6rem; justify-content: center; align-items: flex-start; }
-
-  /* ---------- phone ---------- */
-  .phone { width: 360px; border-radius: 40px; padding: 12px; background: #050506;
-    border: 1px solid #23201a; box-shadow: 0 40px 80px -24px rgba(0,0,0,.7), inset 0 0 0 2px #16130e; }
-  .screen { position: relative; border-radius: 30px; overflow: hidden; padding-bottom: 16px;
-    background: linear-gradient(180deg, var(--scr) 0%, #0a0b0f 60%, #0e0f14 100%); }
-  .statusbar { display: flex; justify-content: space-between; align-items: center;
-    padding: 12px 22px 6px; font-size: .72rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .statusbar .ic { display: flex; align-items: center; gap: 6px; }
-  .bat { width: 22px; height: 11px; border: 1px solid var(--ink); border-radius: 3px; position: relative; padding: 1.5px; }
-  .bat::after { content:''; position:absolute; right:-3px; top:3px; width:2px; height:5px; background:var(--ink); border-radius:0 2px 2px 0; }
-  .bat > i { display:block; height:100%; width:72%; background: var(--gold); border-radius:1px; }
-  .sig { display:flex; align-items:flex-end; gap:2px; }
-  .sig > i { width:3px; background: var(--ink); border-radius:1px; }
-  .sig>i:nth-child(1){height:4px} .sig>i:nth-child(2){height:6px} .sig>i:nth-child(3){height:8px} .sig>i:nth-child(4){height:10px}
-
-  .apphead { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 0 2px; }
-  .apphead .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 12px var(--gold2); }
-  .apphead b { font-size: .68rem; letter-spacing: .22em; text-transform: uppercase; color: #efe2cc; font-weight: 800; }
-
-  /* video hero — portrait premium footage, shown whole (contain); black bg melts via screen-blend + edge mask */
-  .hero { position: relative; height: 340px; margin-top: 6px; }
-  .hero .layer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
-    mix-blend-mode: screen; opacity: 0; transition: opacity .55s ease;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%);
-            mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%); }
-  .hero .layer.on { opacity: 1; }
-  .hero .glow { position: absolute; inset: 0; pointer-events: none;
-    background: radial-gradient(150px 150px at 50% 46%, rgba(245,160,50,.14), transparent 70%); }
-
-  .info-block { padding: 2px 26px 0; text-align: center; }
-  .phase-label { font-size: .62rem; letter-spacing: .2em; text-transform: uppercase; font-weight: 800;
-    color: var(--gold); min-height: 1em; text-shadow: 0 0 12px rgba(245,143,34,.4); transition: opacity .4s; }
-  .title { font-size: 1.16rem; font-weight: 800; margin-top: 5px; color: var(--ink); }
-
-  .progress-row { display: flex; align-items: center; gap: 12px; padding: 0 26px; margin-top: 16px; }
-  .bar { flex: 1; height: 8px; background: var(--track); border-radius: 99px; overflow: hidden; }
-  /* fill reveals a fixed level-gradient: amber (analyze) -> gold (create) -> green (arrange) */
-  .fill { display: block; height: 100%; width: 0%; border-radius: 99px; transition: width .3s ease;
-    background-image: linear-gradient(90deg, #F5701A 0%, #F58F22 22%, #FFBB57 50%, #cdd85b 76%, #8fce6a 100%);
-    background-repeat: no-repeat; background-position: left center; background-size: 100% 100%; }
-  .pct { font-size: .82rem; font-weight: 800; color: #e7d7bd; width: 3.1em; text-align: right; font-variant-numeric: tabular-nums; transition: color .4s; }
-  .status { text-align: center; font-size: .82rem; color: var(--dim); margin-top: 10px; min-height: 1.2em; }
-  .status .dots::after { content:''; animation: dots 1.4s steps(4,end) infinite; }
-  @keyframes dots { 0%{content:''} 25%{content:'·'} 50%{content:'··'} 75%{content:'···'} }
-
-  .steps { list-style: none; padding: 0 26px; margin: 15px 0 0; display: grid; gap: 9px; }
-  .steps li { display: flex; align-items: center; gap: 11px; font-size: .82rem; font-weight: 600; color: var(--dim); transition: color .3s; }
-  .steps li .d { width: 21px; height: 21px; border-radius: 50%; flex: none; display: grid; place-items: center;
-    font-size: .6rem; font-weight: 800; border: 2px solid var(--track); color: var(--dim); transition: all .3s; }
-  .steps li[data-s="active"] { color: var(--ink); }
-  .steps li[data-s="active"] .d { background: var(--gold); border-color: var(--gold); color: #201400;
-    animation: pulse 1.4s ease-in-out infinite; }
-  .steps li[data-s="done"] { color: var(--green); }
-  .steps li[data-s="done"] .d { background: var(--green); border-color: var(--green); color: #0c1a06; }
-  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,187,87,.45)} 50%{box-shadow:0 0 0 6px rgba(255,187,87,0)} }
-
-  /* song card (now-generating track) */
-  .songcard { margin: 16px 22px 0; display: flex; align-items: center; gap: 11px;
-    background: var(--card); border: 1px solid var(--track); border-radius: 15px; padding: 9px 11px; }
-  .songcard .thumb { width: 40px; height: 40px; border-radius: 11px; flex: none; display: grid; place-items: center;
-    font-size: 1.1rem; background: linear-gradient(135deg, #3a2a12, #1c1509); box-shadow: inset 0 0 0 1px rgba(255,187,87,.25); }
-  .songcard .meta { display: flex; flex-direction: column; line-height: 1.3; flex: 1; min-width: 0; }
-  .songcard .meta strong { font-size: .84rem; color: var(--ink); }
-  .songcard .meta span { font-size: .68rem; color: var(--dim); }
-  .songcard .wave { display: flex; align-items: center; gap: 2px; height: 18px; }
-  .songcard .wave i { width: 2.5px; border-radius: 2px; background: var(--gold); animation: eq 1s ease-in-out infinite; }
-  .songcard .wave i:nth-child(2){animation-delay:.15s} .songcard .wave i:nth-child(3){animation-delay:.3s}
-  .songcard .wave i:nth-child(4){animation-delay:.45s} .songcard .wave i:nth-child(5){animation-delay:.1s}
-  @keyframes eq { 0%,100%{height:5px} 50%{height:16px} }
-  .songcard .pausebtn { width: 30px; height: 30px; border-radius: 50%; border: none; flex: none;
-    background: var(--track); color: var(--ink); font-size: .55rem; font-weight: 800; cursor: pointer; }
-
-  /* ---------- info panel ---------- */
-  .info { max-width: 380px; padding-top: .4rem; }
-  .info h3 { font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin: 0 0 1rem; }
-  .tech { list-style: none; padding: 0; margin: 0 0 1.4rem; display: grid; gap: .8rem; }
-  .tech li { font-size: .88rem; line-height: 1.55; color: var(--panel-dim); padding-left: 1.1rem; position: relative; }
-  .tech li::before { content: "❋"; position: absolute; left: 0; color: var(--green); font-size: .7rem; top: .25em; }
-  .tech strong { color: var(--panel-text); font-weight: 700; }
-  .tech code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .78em;
-    background: rgba(255,255,255,.07); padding: .1em .4em; border-radius: 5px; color: #e8cf96; }
-  .size-badge { display: flex; align-items: baseline; gap: .7rem; background: rgba(255,255,255,.04);
-    border: 1px solid var(--track); border-radius: 14px; padding: .9rem 1rem; margin-bottom: 1.3rem; }
-  .size-badge .kb { font-size: 1.5rem; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .size-badge .lbl { font-size: .78rem; color: var(--panel-dim); line-height: 1.4; }
-  .controls { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.2rem; }
-  .controls button { font-family: inherit; font-size: .82rem; font-weight: 700; color: var(--panel-text);
-    background: rgba(255,255,255,.05); border: 1px solid var(--track); border-radius: 99px; padding: .5rem 1rem; cursor: pointer; transition: .2s; }
-  .controls button:hover { border-color: rgba(255,187,87,.5); color: var(--ink); }
-  .note { font-size: .8rem; color: var(--panel-dim); line-height: 1.6; border-top: 1px solid rgba(239,230,210,.12); padding-top: 1rem; }
-  .back { display: inline-block; font-size: .82rem; color: var(--gold); text-decoration: none; margin-bottom: 1.2rem; }
+  /* video loader (design 3 — premium portrait clips, contain) */
+  .vhero { width: 300px; height: 300px; position: relative; }
+  .vhero video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+    mix-blend-mode: screen; opacity: 0; transition: opacity .5s ease;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 10%, #000 90%, transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0, #000 10%, #000 90%, transparent 100%); }
+  .vhero video.on { opacity: 1; }
+  .vhero .cap { position: absolute; left: 0; right: 0; bottom: -4px; text-align: center; font-size: 11px; letter-spacing: .18em;
+    text-transform: uppercase; font-weight: 800; color: var(--accent-light); text-shadow: 0 0 12px rgba(245,143,34,.4); }
 </style>
 </head>
 <body>
-  <div class="pgt"><small>1Pro Studio · Loading Screen Lab</small><h1>Design 03 — Premium Portrait Video Loader</h1></div>
+  <div class="pgt"><small>1Pro Studio · Loading Screen Lab</small><h1>Design 03 — Create Flow · Premium Video Loader</h1></div>
   <main>
-    <section>
-      <div class="phone">
-        <div class="screen">
-          <div class="statusbar">
-            <span>9:41</span>
-            <span class="ic"><span class="sig"><i></i><i></i><i></i><i></i></span>5G<span class="bat"><i></i></span></span>
-          </div>
-          <div class="apphead"><span class="dot"></span><b>Seed of Sounds</b></div>
-          <div class="hero">
-            <video class="layer" id="v0" src="assets/video4.mp4" muted playsinline preload="auto"></video>
-            <video class="layer" id="v1" src="assets/video5.mp4" muted playsinline preload="auto"></video>
-            <video class="layer" id="v2" src="assets/video6.mp4" muted playsinline preload="auto"></video>
-            <div class="glow"></div>
-          </div>
-          <div class="info-block">
-            <div class="phase-label" id="phase">Analyze &amp; Nurture</div>
-            <div class="title">Creating your song</div>
-          </div>
-          <div class="progress-row"><div class="bar"><i class="fill" id="fill"></i></div><span class="pct" id="pct">0%</span></div>
-          <div class="status"><span id="statusText">Charging the music seed</span><span class="dots"></span></div>
-          <ul class="steps">
-            <li id="st0" data-s="active"><span class="d">1</span><span>Analyze &amp; nurture the seed</span></li>
-            <li id="st1" data-s="pending"><span class="d">2</span><span>Create &amp; grow the melody</span></li>
-            <li id="st2" data-s="pending"><span class="d">3</span><span>Arrange &amp; drop the track</span></li>
-          </ul>
-          <div class="songcard">
-            <div class="thumb">☕</div>
-            <div class="meta"><strong>Cafe in Bangkok</strong><span>asobi.buzz · Yama</span></div>
-            <div class="wave"><i></i><i></i><i></i><i></i><i></i></div>
-            <button class="pausebtn" aria-label="Pause">❚❚</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
+    <section><div class="phone"><div class="screen" id="screen"></div></div></section>
     <aside class="info">
       <a class="back" href="index.html">← All designs</a>
       <h3>How it's built</h3>
-      <ul class="tech">
-        <li><strong>Premium portrait footage</strong> — a coherent three-beat story: the Music Seed charges up, a golden sprout grows, then a dew drop falls and ripples. Each beat is its own <code>&lt;video&gt;</code>.</li>
-        <li><strong>Shown whole, no video box</strong> — <code>object-fit: contain</code> keeps the full vertical composition, and <code>mix-blend-mode: screen</code> plus a soft edge <code>mask</code> dissolve the black background into the app.</li>
-        <li><strong>Seamless phase switch</strong> — three stacked video layers cross-fade on <code>opacity</code>; nothing reloads, so there's no black flash between phases.</li>
-        <li><strong>Compressed to 480p</strong> — the three clips together are ~0.9&nbsp;MB (from 5.6&nbsp;MB), audio stripped, indistinguishable at phone size.</li>
-        <li><strong>UI is state-driven</strong> — phase label, level-coloured progress bar, status line and the checklist all follow the current phase; the backend just calls <code>setPhase()</code>.</li>
+      <ul>
+        <li><strong>Real create-song flow</strong> — the LIFF wizard: <code>seed → image → mood → vocal → text → confirm</code>, with step dots, chat bubbles and inline options.</li>
+        <li><strong>Fully mocked</strong> — sample seeds &amp; moods, image kept as a local preview only. No upload, no Mureka call; runs on-hand data to test the UI.</li>
+        <li><strong>Premium portrait processing</strong> — a coherent three-beat story (seed charges, sprout grows, dew drop falls &amp; ripples), shown whole with <code>object-fit: contain</code> + screen-blend so the black melts into the app.</li>
+        <li><strong>Compressed to 480p</strong> — the three clips together are ~0.9&nbsp;MB, audio stripped.</li>
       </ul>
-      <div class="size-badge">
-        <span class="kb" id="kb">…</span>
-        <span class="lbl">total weight of <strong>this page as loaded</strong> — the three phase videos + UI, before gzip.</span>
+      <div class="ctrls">
+        <button id="replay">⟲ Restart flow</button>
+        <button id="skip">⏭ Skip to processing</button>
       </div>
-      <div class="controls">
-        <button id="replay">⟲ Replay</button>
-        <button data-jump="0">Phase 1</button>
-        <button data-jump="1">Phase 2</button>
-        <button data-jump="2">Phase 3</button>
-      </div>
-      <p class="note">This demo plays each phase's clip through to the end, then hands off to the next. In the app, loop each clip and call <code>setPhase(0/1/2)</code> from the music-generation API's status — each phase runs until it's done.</p>
+      <p class="note">Front-end mock of the create page. In the real app the same <code>setStep()</code> machine drives it and the backend fills progress; here a timer stands in.</p>
     </aside>
   </main>
 
+<script src="createflow.js"></script>
 <script>
-(function () {
-  const vids = [document.getElementById('v0'), document.getElementById('v1'), document.getElementById('v2')];
-  const phaseEl = document.getElementById('phase'), statusText = document.getElementById('statusText');
-  const fill = document.getElementById('fill'), pct = document.getElementById('pct');
-  const steps = [document.getElementById('st0'), document.getElementById('st1'), document.getElementById('st2')];
-  const P = [
-    { name: 'Analyze & Nurture', status: 'Charging the music seed' },
-    { name: 'Create & Grow',     status: 'Growing the melody' },
-    { name: 'Arrange & Drop',    status: 'Letting the track drop' },
-  ];
-  let cur = -1, auto = true;
-
-  function setPhase(i, isAuto) {
-    const first = cur < 0; cur = i;
-    if (!isAuto) auto = false;                       // manual jump pins this phase (it just loops)
-    phaseEl.style.opacity = 0;
-    setTimeout(() => { phaseEl.textContent = P[i].name; statusText.textContent = P[i].status; phaseEl.style.opacity = 1; }, first ? 0 : 200);
-    steps.forEach((el, k) => { el.dataset.s = k < i ? 'done' : (k === i ? 'active' : 'pending');
-      el.querySelector('.d').textContent = k < i ? '✓' : (k + 1); });
-    // crossfade video layers (no reload -> no black)
-    vids.forEach((vd, k) => {
-      if (k === i) { try { vd.currentTime = 0; } catch (e) {} vd.play().catch(() => {}); vd.classList.add('on'); }
-      else { vd.classList.remove('on'); setTimeout(() => { if (!vd.classList.contains('on')) vd.pause(); }, 650); }
-    });
+  function makeVideoLoader(srcs, fit) {
+    return {
+      mount(stage) {
+        const box = document.createElement('div'); box.className = 'vhero';
+        box.innerHTML = srcs.map((s, k) =>
+          `<video class="layer" data-k="${k}" src="${s}" muted loop playsinline preload="auto" style="object-fit:${fit}"></video>`
+        ).join('') + '<div class="cap" id="vcap"></div>';
+        stage.appendChild(box);
+        this._box = box; this.vids = [...box.querySelectorAll('video')];
+        this.setPhase(0);
+      },
+      setPhase(i) {
+        if (!this.vids) return;
+        this.vids.forEach((v, k) => {
+          if (k === i) { try { v.currentTime = 0; } catch (e) {} v.play().catch(() => {}); v.classList.add('on'); }
+          else v.classList.remove('on');
+        });
+        const cap = ['Charging the seed', 'Growing the melody', 'Dropping the track'][i];
+        if (this._box) this._box.querySelector('#vcap').textContent = cap;
+      },
+      teardown() { if (this._box) this._box.remove(); this._box = null; this.vids = null; }
+    };
   }
 
-  // play each phase's clip fully, THEN hand off to the next (a pinned phase just loops)
-  vids.forEach((vd, k) => vd.addEventListener('ended', () => {
-    if (cur !== k) return;
-    if (auto) setPhase((k + 1) % 3, true);
-    else { try { vd.currentTime = 0; } catch (e) {} vd.play().catch(() => {}); }
-  }));
-
-  // keep the level-gradient fixed to the track width, so the fill reveals it left->right
-  const barEl = document.querySelector('.bar');
-  function sizeGrad() { fill.style.backgroundSize = barEl.clientWidth + 'px 100%'; }
-  window.addEventListener('resize', sizeGrad); sizeGrad();
-  // colour of the current level: amber -> gold -> green
-  function lvlColor(p) {
-    const a = [245,143,34], g = [255,187,87], G = [143,206,106];
-    const mix = (x, y, t) => x.map((v, i) => Math.round(v + (y[i] - v) * t));
-    const c = p < 50 ? mix(a, g, p / 50) : mix(g, G, (p - 50) / 50);
-    return `rgb(${c[0]},${c[1]},${c[2]})`;
-  }
-  function raf() {
-    if (cur >= 0) {
-      const v = vids[cur];
-      const within = v.duration ? Math.max(0, Math.min(1, v.currentTime / v.duration)) : 0;
-      const p = Math.min(100, ((cur + within) / 3) * 100);
-      fill.style.width = p.toFixed(0) + '%'; pct.textContent = p.toFixed(0) + '%';
-      pct.style.color = lvlColor(p);
-      fill.style.boxShadow = '0 0 10px ' + lvlColor(p).replace('rgb', 'rgba').replace(')', ',.5)');
-    }
-    requestAnimationFrame(raf);
-  }
-
-  // page weight (real loaded bytes), refreshed while videos buffer
-  const kb = document.getElementById('kb');
-  function weight() {
-    let b = 0; const nav = performance.getEntriesByType('navigation')[0];
-    if (nav) b += nav.transferSize || nav.encodedBodySize || 0;
-    for (const r of performance.getEntriesByType('resource')) b += r.transferSize || r.encodedBodySize || 0;
-    kb.textContent = b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB';
-  }
-  setInterval(weight, 1000); weight();
-
-  // controls
-  document.getElementById('replay').addEventListener('click', () => { auto = true; setPhase(0, true); });
-  document.querySelectorAll('.controls [data-jump]').forEach(btn =>
-    btn.addEventListener('click', () => setPhase(+btn.dataset.jump, false)));
-
-  setPhase(0, true); requestAnimationFrame(raf);
-})();
+  const loader = makeVideoLoader(['assets/video4.mp4', 'assets/video5.mp4', 'assets/video6.mp4'], 'contain');
+  CreateFlow.init({ screen: '#screen', loader });
+  document.getElementById('replay').onclick = () => CreateFlow.reset();
+  document.getElementById('skip').onclick = () => {
+    CreateFlow.selectSeed('acoustic'); CreateFlow.mockImage(); CreateFlow.selectMood('romantic'); CreateFlow.selectVocal('male');
+    CreateFlow._s.step = 'confirm'; CreateFlow.next();
+  };
 </script>
 </body>
 </html>
