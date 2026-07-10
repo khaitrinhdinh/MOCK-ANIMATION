@@ -62,8 +62,6 @@
     root.innerHTML = '';
     root.appendChild(el('div', 'statusbar',
       '<span>9:41</span><span class="ic"><span class="sig"><i></i><i></i><i></i><i></i></span>5G<span class="bat"><i></i></span></span>'));
-    root.appendChild(el('div', 'app-header',
-      '<div class="app-header__logo">🌱</div><div class="app-header__name">Seed of Sounds</div><div class="app-header__badge">Studio</div>'));
     const bodyWrap = el('div', 'screen-body');
     bodyWrap.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden';
     bodyWrap.id = 'body';
