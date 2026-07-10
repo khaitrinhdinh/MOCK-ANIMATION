@@ -208,7 +208,7 @@
     if (state.step === 'confirm' && dramaMode) {
       const wrap = el('div', 'drop-nav');
       const btn = el('button', 'drop-btn', '<span class="lbl">DROP your Song</span>');
-      btn.onclick = dropAndCreate;
+      btn.onclick = () => dropAndCreate(btn);
       wrap.appendChild(btn);
       const back = el('button', 'drop-back', 'go back');
       back.onclick = goBack;
@@ -223,17 +223,46 @@
     const last = state.step === 'confirm';
     const next = el('button', 'nav-btn nav-btn--next', last ? 'Create My Song 🎵' : 'Next ›');
     next.disabled = !canProceed();
-    next.onclick = goNext; row.appendChild(next);
+    next.onclick = () => {
+      emitNotes(next, last ? { count: 14, radial: true, dist: 110, size: 19, dur: 1, stagger: .2, color: '#FFD98A' } : { count: 6, size: 15 });
+      goNext();
+    };
+    row.appendChild(next);
     return row;
   }
 
-  // dramatic "drop the song" moment before processing
-  function dropAndCreate() {
-    root.classList.add('screen--shake');
+  // musical-note burst from a button (survives the screen re-render via the phone frame)
+  function emitNotes(btn, o) {
+    o = o || {};
+    const phone = root.closest('.phone'); if (!phone) return;
+    const pr = phone.getBoundingClientRect(), br = btn.getBoundingClientRect();
+    const cx = br.left - pr.left + br.width / 2, cy = br.top - pr.top + br.height / 2;
+    const chars = ['♪', '♫', '♩', '♬'], n = o.count || 6;
+    for (let i = 0; i < n; i++) {
+      const s = el('span', 'note-fx', chars[Math.floor(Math.random() * chars.length)]);
+      let dx, dy;
+      if (o.radial) { const a = (Math.PI * 2 * i) / n + (Math.random() - .5) * .6, r = (o.dist || 90) * (.6 + Math.random() * .6); dx = Math.cos(a) * r; dy = Math.sin(a) * r; }
+      else { dx = (Math.random() - .5) * (o.spread || 80); dy = -(40 + Math.random() * (o.rise || 80)); }
+      s.style.left = cx + 'px'; s.style.top = cy + 'px';
+      s.style.setProperty('--dx', dx.toFixed(0) + 'px');
+      s.style.setProperty('--dy', dy.toFixed(0) + 'px');
+      s.style.setProperty('--rot', ((Math.random() - .5) * 140).toFixed(0) + 'deg');
+      s.style.setProperty('--delay', (Math.random() * (o.stagger || .12)).toFixed(2) + 's');
+      s.style.setProperty('--dur', (o.dur || .9) + 's');
+      s.style.fontSize = (o.size || 15) + 'px';
+      s.style.color = o.color || 'var(--accent-light)';
+      phone.appendChild(s);
+      setTimeout(() => s.remove(), ((o.dur || .9) + (o.stagger || .12)) * 1000 + 150);
+    }
+  }
+
+  // "drop the song" moment before processing — notes fly out + gold flash + word (smooth, no shake)
+  function dropAndCreate(btn) {
+    emitNotes(btn, { count: 16, radial: true, dist: 135, size: 22, dur: 1.15, stagger: .3, color: '#FFD98A' });
     const fx = el('div', 'drop-fx', '<div class="drop-fx__flash"></div><div class="drop-fx__word">DROP!</div>');
     root.appendChild(fx);
     requestAnimationFrame(() => fx.classList.add('drop-fx--go'));
-    setTimeout(() => { root.classList.remove('screen--shake'); startProcessing(); }, 1050);
+    setTimeout(startProcessing, 1150);
   }
 
   function goNext() {
