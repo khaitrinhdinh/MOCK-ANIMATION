@@ -207,7 +207,7 @@
     // final "Drop" step in drama mode: big dramatic DROP button, whisper-quiet Back
     if (state.step === 'confirm' && dramaMode) {
       const wrap = el('div', 'drop-nav');
-      const btn = el('button', 'drop-btn', '<span class="lbl">DROP your Song</span>');
+      const btn = el('button', 'drop-btn', '<span class="lbl">DROP your Song 🎵</span>');
       btn.onclick = () => dropAndCreate(btn);
       wrap.appendChild(btn);
       const back = el('button', 'drop-back', 'go back');

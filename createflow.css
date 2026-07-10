@@ -181,20 +181,14 @@ main { display: flex; flex-wrap: wrap; gap: 2.4rem; justify-content: center; ali
 .nav-btn--next:hover:not(:disabled) { transform: translateY(-1px); }
 .nav-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-/* ── dramatic DROP button (final step, drama mode) ── */
-.drop-nav { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 10px; }
-.drop-btn { position: relative; width: 100%; padding: 20px; border-radius: 20px; border: none; cursor: pointer; font-family: inherit;
-  font-size: 18px; font-weight: 900; letter-spacing: .04em; color: #2a1600; overflow: hidden;
-  background: linear-gradient(180deg, #FFD98A, #F58F22);
-  box-shadow: 0 12px 34px rgba(245,143,34,.5); animation: dropPulse 1.9s ease-in-out infinite; transition: transform .12s ease; }
-.drop-btn:active { transform: scale(.97); }
-.drop-btn .lbl { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.drop-btn .lbl::after { content: "⤓"; font-size: 20px; }
-.drop-btn::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 32%, rgba(255,255,255,.55) 50%, transparent 68%);
-  transform: translateX(-120%); animation: sheen 2.8s ease-in-out infinite; }
-@keyframes dropPulse { 0%,100% { box-shadow: 0 12px 34px rgba(245,143,34,.45), 0 0 0 0 rgba(245,143,34,.55); }
-  50% { box-shadow: 0 16px 44px rgba(245,143,34,.7), 0 0 0 12px rgba(245,143,34,0); } }
-@keyframes sheen { 0%,55% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+/* ── DROP button (final step) — same clean style as the normal CTA, quiet Back ── */
+.drop-nav { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 6px; }
+.drop-btn { width: 100%; padding: 13px 12px; border-radius: 15px; border: none; cursor: pointer; font-family: inherit;
+  font-size: 13px; font-weight: 700; color: #fff; background: var(--accent);
+  box-shadow: 0 4px 12px var(--accent-glow); transition: transform .12s ease, box-shadow .15s ease; }
+.drop-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px var(--accent-glow); }
+.drop-btn:active { transform: scale(.98); }
+.drop-btn .lbl { display: flex; align-items: center; justify-content: center; gap: 6px; }
 .drop-back { background: none; border: none; color: var(--text-muted); font-size: 11px; font-family: inherit; cursor: pointer;
   opacity: .38; padding: 4px 8px; transition: opacity .2s; }
 .drop-back:hover { opacity: .85; }
