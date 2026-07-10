@@ -330,10 +330,10 @@
     if (loader && loader.teardown) loader.teardown();
     const body = renderShell();
     const d = el('div', 'done');
-    d.appendChild(el('div', 'done__check', '✓'));
+    d.appendChild(el('div', 'done__check', '<img src="assets/app-logo.png" alt="1Pro Studio">'));
     d.appendChild(el('h2', null, 'Your Song is Ready!'));
     d.appendChild(el('div', 'done__song', 'Cafe in Bangkok · ' + (state.mood ? state.mood.name : '') + ' ' + (state.seed ? state.seed.name : '')));
-    d.appendChild(el('div', 'done__art', '☕'));
+    d.appendChild(el('div', 'done__art', '<img src="https://s3.ap-northeast-1.amazonaws.com/1-pro-studio/images/U499af03a7c50571b69a8dc3596e8a64a/7D56wvf-UFvtn-JaxRFvC.jpg" alt="Song artwork">'));
     const btns = el('div', 'done__btns');
     const play = el('button', 'done__btn done__btn--play', '▶ Play Now');
     play.onclick = () => { play.textContent = '♪ Now playing…'; };
