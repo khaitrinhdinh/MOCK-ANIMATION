@@ -310,7 +310,6 @@
     const stage = el('div', 'proc__stage'); stage.id = 'stage';
     proc.appendChild(stage);
     proc.appendChild(el('h2', null, 'Creating Your Song'));
-    proc.appendChild(el('p', 'proc__msg', "Our AI is composing your unique song. We'll notify you on LINE when it's ready!"));
     proc.appendChild(el('div', 'proc__bar', '<i class="proc__fill" id="pfill"></i>'));
     proc.appendChild(el('div', 'proc__pct', '<span id="ppct">0%</span>'));
     const steps = el('div', 'proc__steps'); steps.id = 'psteps';
