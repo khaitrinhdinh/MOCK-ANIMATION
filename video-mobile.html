@@ -25,8 +25,9 @@
 
 <script src="createflow.js"></script>
 <script>
-  function makeVideoLoader(srcs, fit) {
+  function makeVideoLoader(srcs, fit, durs) {
     return {
+      phaseDurations() { return (durs || [8, 8, 8]).map(d => d * 1000); },
       mount(stage) {
         const box = document.createElement('div'); box.className = 'vhero';
         box.innerHTML = srcs.map((s, k) =>
@@ -49,7 +50,7 @@
     };
   }
 
-  const loader = makeVideoLoader(['assets/video1.mp4', 'assets/video2.mp4', 'assets/video3.mp4'], 'cover');
+  const loader = makeVideoLoader(['assets/video1.mp4', 'assets/video2.mp4', 'assets/video3.mp4'], 'cover', [10, 10, 10]);
   CreateFlow.init({ screen: '#screen', loader });
 </script>
 </body>

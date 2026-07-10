@@ -271,13 +271,16 @@
       [...document.querySelectorAll('#psteps .proc__step')].forEach((st, k) => { if (k < i) st.querySelector('.d').textContent = '✓'; });
       if (loader && loader.setPhase) loader.setPhase(i);
     };
-    // mock progress 0 -> 100 over ~9.6s, mapped to the 3 processing steps
-    const DUR = 9600, t0 = performance.now();
+    // per-phase durations: the loader can play each clip fully; else ~3.8s each
+    const durs = (loader && loader.phaseDurations && loader.phaseDurations()) || [3800, 3800, 3800];
+    const b1 = durs[0], b2 = durs[0] + durs[1], total = durs[0] + durs[1] + durs[2];
+    const t0 = performance.now();
     clearInterval(procTimer);
     procTimer = setInterval(() => {
-      const p = Math.min(100, ((performance.now() - t0) / DUR) * 100);
+      const elapsed = performance.now() - t0;
+      const p = Math.min(100, (elapsed / total) * 100);
       fill.style.width = p.toFixed(0) + '%'; pct.textContent = p.toFixed(0) + '%';
-      setPhase(p >= 66 ? 2 : p >= 33 ? 1 : 0);
+      setPhase(elapsed >= b2 ? 2 : elapsed >= b1 ? 1 : 0);
       if (p >= 100) { clearInterval(procTimer); if (loader && loader.done) loader.done(); setTimeout(showDone, loader && loader.done ? 1600 : 500); }
     }, 80);
   }
