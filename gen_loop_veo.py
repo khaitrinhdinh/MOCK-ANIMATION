@@ -87,25 +87,25 @@ PRESETS = {
         ),
     },
     "video7": {
-        "FRAME": "assets/veo/v6_dropframe.png",       # frame cuối video6: giọt + gợn nước
-        "OUT":   "assets/veo/video7_loopback.mp4",
-        "DURATION": 8,
+        "FRAME": "assets/veo/phase3_lastframe.png",   # frame cuối video6: lá + giọt + gợn nước
+        "OUT":   "assets/veo/video7_wave.mp4",
+        "DURATION": 6,
         "PROMPT": (
-            "A cinematic 8-second shot continuing exactly from the input image (the golden droplet and "
-            "the dark reflective water with ripples), same colors, warm golden lighting, pure black "
-            "background, static camera. "
-            "0.0-1.5s: the golden droplet finishes landing on the dark water, creating soft concentric "
-            "circular ripple rings that spread outward. "
-            "1.5-4.0s: the circular water ripples gradually and smoothly transform into glowing golden "
-            "sound waves - horizontal audio-waveform lines and equalizer-like waves made of light that "
-            "gently pulse to a rhythm, the water surface morphing into music waves. "
-            "4.0-6.5s: the glowing golden sound waves and small golden musical notes swirl inward and "
-            "converge toward the center, coalescing and forming into a single glossy golden translucent "
-            "droplet of music. "
-            "6.5-8.0s: it settles into one centered glossy golden droplet containing a golden musical "
-            "staff and notes inside, floating on pure black, calm and still - like a seed of music. "
-            "Smooth elegant magical transformation from water into music. No text, no new elements "
-            "beyond the notes, no splashing."
+            "A cinematic 6-second shot continuing exactly from the input image (golden leaf, a golden "
+            "droplet, dark reflective water with ripples), same colors, warm golden lighting, pure "
+            "black background, static camera. "
+            "0.0-1.5s: the golden droplet finishes landing on the dark water, soft concentric ripple "
+            "rings spread outward across the surface, the leaf still visible at the top. "
+            "1.5-3.5s: the golden leaf slowly fades away and dissolves into the dark background until it "
+            "is completely gone, while at the same time the circular water ripples begin transforming "
+            "into glowing golden sound waves. "
+            "3.5-6.0s: the leaf is fully gone; the ripples have become a horizontal band of glowing "
+            "golden sound waves - flowing luminous sine-wave lines and an audio-equalizer waveform made "
+            "of light, several parallel glowing golden lines gently oscillating like music, centered "
+            "horizontally across the middle of the frame, settling into a steady calm rhythm. "
+            "IMPORTANT: by the end only the glowing golden sound-wave band remains on pure black. Keep "
+            "the upper-center area empty dark space. Do NOT create any droplet, ball, seed or musical "
+            "note. No text, no splashing."
         ),
     },
 }
