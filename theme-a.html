@@ -98,7 +98,27 @@
   .video-loader { position: relative; width: 300px; height: 330px; margin-bottom: 6px; }
   .video-loader__layer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; mix-blend-mode: screen; opacity: 0; transition: opacity .7s ease; }
   .video-loader__layer.is-on { opacity: 1; }
-  .ptrack { width: 100%; max-width: 260px; height: 6px; border-radius: 999px; background: var(--bg-card); overflow: hidden; margin: 6px 0 16px; } .pfill { height: 100%; background: var(--accent); transition: width .25s linear; }
+  .ptrack { width: 100%; max-width: 260px; height: 6px; border-radius: 999px; background: var(--bg-card); overflow: hidden; margin: 6px 0 14px; } .pfill { height: 100%; background: var(--accent); transition: width .25s linear; }
+  .pstepper { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .pdot { width: 24px; height: 24px; flex: 0 0 24px; box-sizing: border-box; line-height: 1; border-radius: 50%; background: var(--bg-card); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--text-muted); transition: all .3s; }
+  .pdot.active { background: var(--accent-surface); border-color: var(--accent); color: var(--accent-light); }
+  .pdot.dn { background: var(--accent); border-color: var(--accent); color: var(--bg-base); }
+  .pstep-txt { font-size: 12px; font-weight: 600; color: var(--accent-light); margin-bottom: 22px; }
+  .pclose { padding: 12px 24px; border-radius: 10px; background: var(--bg-card); border: 1px solid var(--border-md); color: var(--text-primary); font-size: 13px; font-weight: 600; cursor: pointer; }
+
+  /* Completed screen */
+  .done { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 32px 24px; }
+  .done-logo { width: 68px; height: 68px; border-radius: 17px; overflow: hidden; margin-bottom: 18px; box-shadow: 0 0 40px var(--accent-glow), 0 8px 22px rgba(0,0,0,.45); }
+  .done-logo img { width: 100%; height: 100%; object-fit: cover; }
+  .done-title { font-size: 21px; font-weight: 800; margin-bottom: 6px; }
+  .done-sub { font-size: 14px; color: var(--text-secondary); margin-bottom: 22px; }
+  .done-cover { width: 200px; height: 200px; border-radius: 14px; overflow: hidden; margin-bottom: 24px; box-shadow: 0 12px 40px rgba(0,0,0,.4); position: relative; }
+  .done-cover img { width: 100%; height: 100%; object-fit: cover; }
+  .done-cover .dur { position: absolute; bottom: 8px; right: 8px; font-size: 11px; font-weight: 700; color: #fff; background: rgba(0,0,0,.6); padding: 3px 8px; border-radius: 999px; }
+  .done-btns { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 280px; }
+  .done-btn { padding: 14px 20px; border-radius: 999px; font-weight: 700; font-size: 15px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .done-btn.primary { background: var(--accent); color: var(--bg-base); box-shadow: 0 10px 24px rgba(245,143,34,.25); }
+  .done-btn.secondary { background: var(--bg-card); color: #fff; border: 1px solid var(--border-md); }
 
   /* ===== Seed detail = liff full-screen page ===== */
   .detail { position: absolute; inset: 0; z-index: 20; background: #09090e; overflow-y: auto; display: none; }
@@ -164,8 +184,12 @@
   const S = { step:'theme', theme:null, expand:0, genre:'Pop', seed:null, mood:null, vocal:null };
 
   function dots() {
+    const el = document.getElementById('dots');
+    // Processing & completed are full-screen takeovers (like liff) — no step bar.
+    if (S.step==='processing' || S.step==='completed') { el.style.display='none'; return; }
+    el.style.display='flex';
     const a = STEP_IDX[S.step];
-    document.getElementById('dots').innerHTML = STEPS.map((l,i)=>`
+    el.innerHTML = STEPS.map((l,i)=>`
       <div class="step-dot-wrap" ${i<a?`data-jump="${ORDER[i]}" style="cursor:pointer"`:''}>
         <div class="step-dot ${i<a?'step-dot--done':''} ${i===a?'step-dot--active':''}">${i<a?'✓':i+1}</div>
         <span class="step-dot-label ${i===a?'step-dot-label--active':''}">${l}</span>
@@ -184,7 +208,7 @@
   function render() {
     if (procTimer) { clearInterval(procTimer); procTimer = null; }
     dots();
-    foot.style.display = S.step==='processing' ? 'none' : 'block';
+    foot.style.display = (S.step==='processing' || S.step==='completed') ? 'none' : 'block';
     let h = '';
 
     if (S.step==='theme') {
@@ -268,7 +292,23 @@
         </div>
         <h2 style="font-size:19px;font-weight:700;margin-bottom:6px">Creating Your Song</h2>
         <div class="ptrack"><div class="pfill" id="pfill" style="width:10%"></div></div>
-        <div id="pstep" style="font-size:12px;font-weight:600;color:var(--accent-light)">Analyzing your inputs…</div>
+        <div class="pstepper" id="pstepper"></div>
+        <div class="pstep-txt" id="pstep">Analyzing your inputs…</div>
+        <button class="pclose">Close &amp; Wait for Notification</button>
+      </div>`;
+    }
+
+    else if (S.step==='completed') {
+      const si = S.seed??0, s = SEEDS[si];
+      h = `<div class="done">
+        <div class="done-logo"><img src="assets/1pro-icon.png" alt="1Pro"></div>
+        <div class="done-title">Your Song is Ready!</div>
+        <div class="done-sub">${s.name} — 1 min.</div>
+        <div class="done-cover"><img src="https://picsum.photos/seed/opro-song${si}/440/440"><span class="dur">1:00</span></div>
+        <div class="done-btns">
+          <button class="done-btn primary">▶  Play Now</button>
+          <button class="done-btn secondary" data-again>＋  Create Another</button>
+        </div>
       </div>`;
     }
 
@@ -276,6 +316,12 @@
     wire();
     updateNext();
     if (S.step==='processing') initProcessing();
+    if (S.step==='completed') { const b=body.querySelector('[data-again]'); if (b) b.onclick=resetAll; }
+  }
+
+  function resetAll() {
+    S.step='theme'; S.theme=null; S.expand=0; S.genre='Pop'; S.seed=null; S.mood=null; S.vocal=null;
+    render();
   }
 
   // Vanilla port of liff's VideoLoader: phase1 self-loops; phase2/3 play their
@@ -285,12 +331,15 @@
     const vids = [...document.querySelectorAll('.video-loader__layer')];
     const steps = ['Analyzing your inputs…','Generating lyrics…','Composing music…'];
     const loops = [null, 'assets/loader/phase2_loop.mp4', 'assets/loader/phase3_loop.mp4'];
-    const pfill = document.getElementById('pfill'), pstep = document.getElementById('pstep');
+    const pfill = document.getElementById('pfill'), pstep = document.getElementById('pstep'), pstepper = document.getElementById('pstepper');
     let disp = 0;
+    const renderStepper = (d) => { if (!pstepper) return;
+      pstepper.innerHTML = [0,1,2].map(i => `<div class="pdot ${i===d?'active':''} ${i<d?'dn':''}">${i<d?'✓':(i===d?'•':i+1)}</div>`).join(''); };
     const show = (i) => {
       disp = i;
       vids.forEach((v,k)=>{ v.classList.toggle('is-on', k===i); if (k===i){ try{v.currentTime=0}catch{} v.play().catch(()=>{}); } });
       if (pstep) pstep.textContent = steps[i];
+      renderStepper(i);
     };
     vids.forEach((v,i)=>{ if (loops[i]) v.addEventListener('ended', ()=>{ if (disp===i){ v.src=loops[i]; v.loop=true; v.play().catch(()=>{}); } }); });
     show(0);
@@ -299,7 +348,11 @@
       p = Math.min(100, p+2); if (pfill) pfill.style.width = p+'%';
       if (p>=40 && disp<1) show(1);
       if (p>=72 && disp<2) show(2);
-      if (p>=100 && procTimer) { clearInterval(procTimer); procTimer=null; }
+      if (p>=100 && procTimer) {
+        clearInterval(procTimer); procTimer=null;
+        // Song done → show the completed screen (like liff's CompletedScreen)
+        setTimeout(()=>{ if (S.step==='processing') { S.step='completed'; render(); } }, 900);
+      }
     }, 260);
   }
 
