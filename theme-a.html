@@ -93,11 +93,12 @@
   .srow .val { font-size: 15px; font-weight: 700; color: #fff; margin-top: 2px; }
   .srow .val.muted { color: var(--text-muted); font-weight: 500; font-size: 13px; }
 
-  /* Processing */
-  .proc { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 32px 24px; }
-  .orb { width: 92px; height: 92px; border-radius: 50%; background: radial-gradient(circle, var(--accent-surface), transparent 70%); border: 1.5px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 28px; box-shadow: 0 0 40px var(--accent-glow); animation: pulse 2s ease-in-out infinite; }
-  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
-  .ptrack { width: 100%; max-width: 260px; height: 6px; border-radius: 999px; background: var(--bg-card); overflow: hidden; margin-bottom: 16px; } .pfill { height: 100%; background: var(--accent); }
+  /* Processing — real liff VideoLoader (clips blended with screen) */
+  .proc { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 24px; background: #050507; }
+  .video-loader { position: relative; width: 300px; height: 330px; margin-bottom: 6px; }
+  .video-loader__layer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; mix-blend-mode: screen; opacity: 0; transition: opacity .7s ease; }
+  .video-loader__layer.is-on { opacity: 1; }
+  .ptrack { width: 100%; max-width: 260px; height: 6px; border-radius: 999px; background: var(--bg-card); overflow: hidden; margin: 6px 0 16px; } .pfill { height: 100%; background: var(--accent); transition: width .25s linear; }
 
   /* ===== Seed detail = liff full-screen page ===== */
   .detail { position: absolute; inset: 0; z-index: 20; background: #09090e; overflow-y: auto; display: none; }
@@ -181,6 +182,7 @@
   }
 
   function render() {
+    if (procTimer) { clearInterval(procTimer); procTimer = null; }
     dots();
     foot.style.display = S.step==='processing' ? 'none' : 'block';
     let h = '';
@@ -258,15 +260,47 @@
     }
 
     else if (S.step==='processing') {
-      h = `<div class="proc"><div class="orb">🎵</div>
-        <h2 style="font-size:19px;font-weight:700;margin-bottom:10px">Creating Your Song</h2>
-        <div class="ptrack"><div class="pfill" style="width:45%"></div></div>
-        <div style="font-size:12px;font-weight:600;color:var(--accent-light)">Generating lyrics…</div></div>`;
+      h = `<div class="proc">
+        <div class="video-loader">
+          <video class="video-loader__layer is-on" data-ph="0" src="assets/loader/phase1.mp4" muted playsinline preload="auto" loop poster="assets/loader/poster.jpg"></video>
+          <video class="video-loader__layer" data-ph="1" src="assets/loader/phase2.mp4" muted playsinline preload="auto" poster="assets/loader/poster.jpg"></video>
+          <video class="video-loader__layer" data-ph="2" src="assets/loader/phase3.mp4" muted playsinline preload="auto" poster="assets/loader/poster.jpg"></video>
+        </div>
+        <h2 style="font-size:19px;font-weight:700;margin-bottom:6px">Creating Your Song</h2>
+        <div class="ptrack"><div class="pfill" id="pfill" style="width:10%"></div></div>
+        <div id="pstep" style="font-size:12px;font-weight:600;color:var(--accent-light)">Analyzing your inputs…</div>
+      </div>`;
     }
 
     body.innerHTML = h;
     wire();
     updateNext();
+    if (S.step==='processing') initProcessing();
+  }
+
+  // Vanilla port of liff's VideoLoader: phase1 self-loops; phase2/3 play their
+  // intro once, then switch to a tail loop. Driven here by a demo timer.
+  let procTimer = null;
+  function initProcessing() {
+    const vids = [...document.querySelectorAll('.video-loader__layer')];
+    const steps = ['Analyzing your inputs…','Generating lyrics…','Composing music…'];
+    const loops = [null, 'assets/loader/phase2_loop.mp4', 'assets/loader/phase3_loop.mp4'];
+    const pfill = document.getElementById('pfill'), pstep = document.getElementById('pstep');
+    let disp = 0;
+    const show = (i) => {
+      disp = i;
+      vids.forEach((v,k)=>{ v.classList.toggle('is-on', k===i); if (k===i){ try{v.currentTime=0}catch{} v.play().catch(()=>{}); } });
+      if (pstep) pstep.textContent = steps[i];
+    };
+    vids.forEach((v,i)=>{ if (loops[i]) v.addEventListener('ended', ()=>{ if (disp===i){ v.src=loops[i]; v.loop=true; v.play().catch(()=>{}); } }); });
+    show(0);
+    let p = 10;
+    procTimer = setInterval(()=>{
+      p = Math.min(100, p+2); if (pfill) pfill.style.width = p+'%';
+      if (p>=40 && disp<1) show(1);
+      if (p>=72 && disp<2) show(2);
+      if (p>=100 && procTimer) { clearInterval(procTimer); procTimer=null; }
+    }, 260);
   }
 
   function wire() {
