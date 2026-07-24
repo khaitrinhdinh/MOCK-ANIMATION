@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Design A — full create flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<style>
+  .scroll-body { padding: 16px 14px 88px; }
+  .thumb-img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* Full-width expandable theme card */
+  .tcard { border-radius: 18px; border: 1px solid var(--border-md); background: rgba(255,255,255,0.04); overflow: hidden; margin-bottom: 12px; transition: all .2s; }
+  .tcard.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .tcard-head { display: flex; align-items: center; gap: 12px; padding: 12px; cursor: pointer; }
+  .tcard-head .thumb { width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0; overflow: hidden; }
+  .tcard-head .m { flex: 1; min-width: 0; }
+  .tcard-head .k { font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--text-muted); text-transform: uppercase; }
+  .tcard-head .t { font-size: 16px; font-weight: 700; color: #fff; }
+  .exp { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-md); color: var(--text-secondary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform .25s; }
+  .tcard.open .exp { transform: rotate(180deg); }
+  .tcard-body { max-height: 0; overflow: hidden; transition: max-height .35s ease; }
+  .tcard.open .tcard-body { max-height: 720px; }
+  .tcard-inner { padding: 0 14px 14px; }
+  .cover { width: 100%; aspect-ratio: 16/9; border-radius: 14px; overflow: hidden; margin-bottom: 14px; position: relative; }
+  .cover img { width: 100%; height: 100%; object-fit: cover; }
+  .il { font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--accent-light); text-transform: uppercase; margin-bottom: 5px; }
+  .itext { font-size: 13px; line-height: 1.65; color: rgba(255,255,255,0.75); margin-bottom: 14px; }
+  .artist { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .artist .av { width: 26px; height: 26px; border-radius: 50%; background: var(--accent-surface); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .artist .nm { font-size: 13px; font-weight: 600; color: #fff; }
+  .gtags { margin-bottom: 16px; }
+  .select-btn { width: 100%; padding: 13px; border-radius: 12px; border: none; background: var(--accent); color: var(--bg-base); font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 8px 20px rgba(245,143,34,.22); }
+  .tcard.sel .select-btn { background: var(--success); }
+
+  /* Summary bar */
+  .sumbar { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--accent); background: var(--accent-surface); margin-bottom: 10px; }
+  .sumbar .thumb { width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0; overflow: hidden; }
+  .sumbar .m { flex: 1; min-width: 0; }
+  .sumbar .k { font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--accent-light); text-transform: uppercase; }
+  .sumbar .v { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sumbar .change { font-size: 12px; font-weight: 600; color: var(--accent-light); background: none; border: none; cursor: pointer; flex-shrink: 0; }
+
+  /* Genre filter */
+  .filter-head { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin: 16px 0 8px; }
+  .filter-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .fchip { flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border-md); font-size: 13px; font-weight: 600; background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.7); cursor: pointer; white-space: nowrap; }
+  .fchip .fi { font-size: 14px; line-height: 1; }
+  .fchip.on { background: var(--accent); border-color: var(--accent); color: var(--bg-base); }
+
+  /* Seed card */
+  .scard { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; border: 1px solid var(--border-md); background: rgba(255,255,255,0.04); cursor: pointer; margin-bottom: 10px; }
+  .scard.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); background: var(--accent-surface); }
+  .scard .thumb { width: 60px; height: 60px; border-radius: 12px; flex-shrink: 0; position: relative; overflow: hidden; }
+  .scard .thumb .ov { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.3); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+  .scard .thumb .play { bottom: 4px; right: 4px; }
+  .scard .thumb .more { top: 4px; left: 4px; font-weight: 700; }
+  .scard .m { flex: 1; min-width: 0; }
+  .scard .t { font-size: 15px; font-weight: 700; color: #fff; }
+  .scard .d { font-size: 12.5px; line-height: 1.5; color: rgba(255,255,255,0.62); margin-top: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .radio { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border-strong); flex-shrink: 0; display: flex; align-items: center; justify-content: center; align-self: flex-start; margin-top: 4px; }
+  .scard.sel .radio { border-color: var(--accent); background: var(--accent); color: var(--bg-base); font-weight: 900; font-size: 12px; }
+  .sec-label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: .08em; margin: 6px 0 10px; }
+
+  /* Upload / mood / vocal */
+  .upload { width: 100%; aspect-ratio: 3/2; border-radius: 16px; border: 2px dashed var(--border-md); background: rgba(255,255,255,0.04); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; }
+  .upload .circle { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 12px; }
+  .upload .t1 { font-size: 14px; font-weight: 700; } .upload .t2 { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+  .mood-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .mood { display: flex; flex-direction: column; align-items: center; padding: 16px 8px; border-radius: 16px; border: 1px solid var(--border-md); background: rgba(255,255,255,0.04); cursor: pointer; }
+  .mood.sel { border-color: var(--accent); background: var(--accent-surface); box-shadow: 0 0 0 1px var(--accent); }
+  .mood .e { font-size: 28px; margin-bottom: 8px; } .mood .l { font-size: 11px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: .04em; }
+  .vcard { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; border: 1px solid var(--border-md); background: rgba(255,255,255,0.04); cursor: pointer; margin-bottom: 10px; }
+  .vcard.sel { border-color: var(--accent); background: var(--accent-surface); box-shadow: 0 0 0 1px var(--accent); }
+  .vcard .thumb { width: 54px; height: 54px; border-radius: 12px; overflow: hidden; flex-shrink: 0; }
+  .vcard .m { flex: 1; } .vcard .t { font-size: 15px; font-weight: 700; color: #fff; } .vcard .d { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .ta-wrap { background: var(--bg-card); border: 1px solid var(--border-md); border-left: 2px solid var(--accent); border-radius: 12px; padding: 14px; margin-bottom: 16px; }
+  .ta { width: 100%; min-height: 110px; background: transparent; border: none; resize: none; outline: none; font-size: 15px; line-height: 1.6; color: var(--text-primary); font-family: inherit; }
+  .ta::placeholder { color: rgba(255,255,255,0.25); }
+  .tips { padding: 18px; border-radius: 16px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); }
+  .tip { display: flex; gap: 10px; margin-bottom: 10px; } .tip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-top: 6px; flex-shrink: 0; } .tip p { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.55; }
+
+  /* Confirm summary — itemized rows */
+  .sum { border-radius: 20px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); overflow: hidden; }
+  .srow { display: flex; align-items: center; gap: 12px; padding: 13px 14px; }
+  .srow + .srow { border-top: 1px solid var(--border); }
+  .srow .ic { width: 44px; height: 44px; border-radius: 11px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; background: rgba(255,255,255,0.05); }
+  .srow .ic img { width: 100%; height: 100%; object-fit: cover; }
+  .srow .lab { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+  .srow .val { font-size: 15px; font-weight: 700; color: #fff; margin-top: 2px; }
+  .srow .val.muted { color: var(--text-muted); font-weight: 500; font-size: 13px; }
+
+  /* Processing */
+  .proc { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 32px 24px; }
+  .orb { width: 92px; height: 92px; border-radius: 50%; background: radial-gradient(circle, var(--accent-surface), transparent 70%); border: 1.5px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 28px; box-shadow: 0 0 40px var(--accent-glow); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+  .ptrack { width: 100%; max-width: 260px; height: 6px; border-radius: 999px; background: var(--bg-card); overflow: hidden; margin-bottom: 16px; } .pfill { height: 100%; background: var(--accent); }
+
+  /* ===== Seed detail = liff full-screen page ===== */
+  .detail { position: absolute; inset: 0; z-index: 20; background: #09090e; overflow-y: auto; display: none; }
+  .detail.show { display: block; }
+  .back { position: absolute; top: 14px; left: 14px; z-index: 5; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,.45); backdrop-filter: blur(6px); border: none; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .hero { position: absolute; inset-inline: 0; top: 0; height: 62%; pointer-events: none; background-size: cover; background-position: center; }
+  .hero::after { content: ''; position: absolute; inset: 0; }
+  .d-body { position: relative; display: flex; flex-direction: column; align-items: center; padding: 84px 0 40px; }
+  .d-thumb { width: 176px; height: 176px; border-radius: 16px; overflow: hidden; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,.6); outline: 1px solid rgba(255,255,255,.15); }
+  .d-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .d-brand { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 7px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+  .d-brand img { width: 100%; height: 100%; object-fit: cover; }
+  .d-name-ov { position: absolute; inset-inline: 0; bottom: 0; padding: 22px 12px 8px; background: linear-gradient(to top, rgba(0,0,0,.72), transparent); font-size: 14px; font-weight: 800; color: #fff; }
+  .d-content { width: 100%; padding: 0 20px; margin-top: 20px; }
+  .d-desc { font-size: 15px; line-height: 1.6; color: rgba(255,255,255,0.55); }
+  .d-meta { display: flex; gap: 40px; margin-top: 28px; }
+  .d-meta .lab { font-size: 12px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: .04em; }
+  .d-meta .val { font-size: 16px; font-weight: 700; color: #fff; text-transform: uppercase; margin-top: 3px; }
+  .d-prev-lab { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: .06em; margin: 28px 0 8px; }
+  .d-player { display: flex; align-items: center; gap: 12px; border-radius: 16px; background: rgba(255,255,255,0.04); border: 1px solid var(--border-md); padding: 12px; }
+  .d-play { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .wave { flex: 1; display: flex; align-items: center; gap: 2px; height: 34px; }
+  .wave i { flex: 1; border-radius: 999px; }
+  .d-time { font-size: 13px; color: rgba(255,255,255,0.4); flex-shrink: 0; }
+  .d-select { width: 100%; margin-top: 22px; padding: 15px; border-radius: 16px; border: none; background: var(--accent); color: var(--bg-base); font-weight: 800; font-size: 16px; cursor: pointer; box-shadow: 0 10px 24px rgba(245,143,34,.25); }
+</style>
+</head>
+<body>
+<div class="phone app-shell">
+  <div class="app-ambient"></div>
+  <div class="main">
+    <div class="chat-panel">
+      <div class="step-dots" id="dots"></div>
+      <div class="scroll-body scrollbar-hide" id="body"></div>
+    </div>
+    <div class="foot" id="foot"><button class="next-btn" id="next" disabled>Next Step ›</button></div>
+    <div class="detail" id="detail"></div>
+  </div>
+</div>
+
+<script src="theme-data.js"></script>
+<script>
+  const STEPS = ['Theme','Seed','Image','Mood','Vocal','Text','Create'];
+  const STEP_IDX = { theme:0, seed:1, image:2, mood:3, vocal:4, text:5, create:6, processing:6 };
+  const ORDER = ['theme','seed','image','mood','vocal','text','create'];
+  const FILTERS = [{n:'Pop',i:'🎤'},{n:'Rock',i:'🎸'},{n:'Ballad',i:'🎹'},{n:'EDM',i:'🎧'},{n:'Anime',i:'🌸'},{n:'Lo-fi',i:'☕'}];
+  const MOODS = [{e:'😢',l:'Emotional'},{e:'😊',l:'Happy'},{e:'😌',l:'Chill'},{e:'🔥',l:'Powerful'},{e:'💗',l:'Romantic'},{e:'✨',l:'Dreamy'}];
+  // Vocal = specific named voices (Prisma: name, description, gender, imageUrl, fileUrl)
+  const VOCALS = [
+    { n:'Aoi',    g:'Female', d:'Bright, airy soprano with a gentle vibrato — fits pop and ballads.' },
+    { n:'Haruto', g:'Male',   d:'Warm baritone, smooth and grounded — great for mellow, emotional tracks.' },
+    { n:'Mei',    g:'Female', d:'Soulful alto with a husky edge — expressive and intimate.' },
+    { n:'Ren',    g:'Male',   d:'Energetic tenor, crisp and youthful — punchy for upbeat songs.' },
+  ];
+
+  // Real placeholder images (stable per item)
+  const timg = i => `https://picsum.photos/seed/opro-theme${i}/640/400`;
+  const simg = i => `https://picsum.photos/seed/opro-seed${i}/360/360`;
+  const vimg = i => `https://picsum.photos/seed/opro-vocal${i}/160/160`;
+
+  const body = document.getElementById('body'), nextBtn = document.getElementById('next'), foot = document.getElementById('foot');
+  const detail = document.getElementById('detail');
+  const S = { step:'theme', theme:null, expand:0, genre:'Pop', seed:null, mood:null, vocal:null };
+
+  function dots() {
+    const a = STEP_IDX[S.step];
+    document.getElementById('dots').innerHTML = STEPS.map((l,i)=>`
+      <div class="step-dot-wrap" ${i<a?`data-jump="${ORDER[i]}" style="cursor:pointer"`:''}>
+        <div class="step-dot ${i<a?'step-dot--done':''} ${i===a?'step-dot--active':''}">${i<a?'✓':i+1}</div>
+        <span class="step-dot-label ${i===a?'step-dot-label--active':''}">${l}</span>
+        ${i<STEPS.length-1?`<div class="step-line ${i<a?'step-line--done':''}"></div>`:''}
+      </div>`).join('');
+    document.querySelectorAll('[data-jump]').forEach(n=>n.onclick=()=>{ S.step=n.dataset.jump; render(); });
+  }
+
+  function themeSummary() {
+    const t = THEMES[S.theme];
+    return `<div class="sumbar"><div class="thumb"><img class="thumb-img" src="${timg(S.theme)}"></div>
+      <div class="m"><div class="k">Theme</div><div class="v">${t.name}</div></div>
+      <button class="change" data-jump2="theme">Change</button></div>`;
+  }
+
+  function render() {
+    dots();
+    foot.style.display = S.step==='processing' ? 'none' : 'block';
+    let h = '';
+
+    if (S.step==='theme') {
+      h = `<p class="sec-label">Select a theme</p>` + THEMES.map((t,i)=>{
+        const open=S.expand===i, sel=S.theme===i;
+        return `<div class="tcard ${open?'open':''} ${sel?'sel':''}">
+          <div class="tcard-head" data-exp="${i}">
+            <div class="thumb"><img class="thumb-img" src="${timg(i)}"></div>
+            <div class="m"><div class="k">Theme</div><div class="t">${t.name}</div></div>
+            <div class="exp"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+          </div>
+          <div class="tcard-body"><div class="tcard-inner">
+            <div class="cover"><img src="${timg(i)}"></div>
+            <div class="il">Full information</div><div class="itext">${t.description}</div>
+            <div class="il">Presented by</div><div class="artist"><div class="av">🏢</div><div class="nm">${t.postedBy}</div></div>
+            <div class="il">Genre</div><div class="tags gtags">${t.hashtags.map(x=>`<span class="tag-chip">${x}</span>`).join('')}</div>
+            <button class="select-btn" data-pick="${i}">${sel?'✓ Selected':'Select this theme'}</button>
+          </div></div></div>`;
+      }).join('');
+    }
+
+    else if (S.step==='seed') {
+      h = themeSummary() +
+        `<div class="filter-head">🔎 Filter seeds by genre</div>
+         <div class="filter-row">${FILTERS.map(f=>`<button class="fchip ${S.genre===f.n?'on':''}" data-f="${f.n}"><span class="fi">${f.i}</span>${f.n}</button>`).join('')}</div>
+         <p class="sec-label" style="margin-top:14px">Choose a seed</p>` +
+        SEEDS.map((s,i)=>`<div class="scard ${S.seed===i?'sel':''}" data-si="${i}">
+          <div class="thumb"><img class="thumb-img" src="${simg(i)}"><div class="ov more" data-detail="${i}">⋯</div><div class="ov play" data-prev>▶</div></div>
+          <div class="m"><div class="t">${s.name}</div><div class="d">${s.description}</div></div>
+          <div class="radio">${S.seed===i?'✓':''}</div></div>`).join('');
+    }
+
+    else if (S.step==='image') {
+      h = `<p class="sec-label">Add a photo (optional)</p>
+        <div class="upload"><div class="circle">📷</div><div class="t1">Upload a photo</div><div class="t2">JPG, PNG up to 10MB</div></div>`;
+    }
+
+    else if (S.step==='mood') {
+      h = `<p class="sec-label">Choose a mood</p><div class="mood-grid">` +
+        MOODS.map((m,i)=>`<div class="mood ${S.mood===i?'sel':''}" data-mood="${i}"><div class="e">${m.e}</div><div class="l">${m.l}</div></div>`).join('') + `</div>`;
+    }
+
+    else if (S.step==='vocal') {
+      // Same card + detail language as seeds — each voice has a name and its own detail page.
+      h = `<p class="sec-label">Choose a vocal</p>` +
+        VOCALS.map((v,i)=>`<div class="scard ${S.vocal===i?'sel':''}" data-vi="${i}">
+          <div class="thumb"><img class="thumb-img" src="${vimg(i)}"><div class="ov more" data-vdetail="${i}">⋯</div><div class="ov play" data-prev>▶</div></div>
+          <div class="m"><div class="t">${v.n}</div><div class="d">${v.d}</div></div>
+          <div class="radio">${S.vocal===i?'✓':''}</div></div>`).join('');
+    }
+
+    else if (S.step==='text') {
+      h = `<p class="sec-label">Add a message (optional)</p>
+        <div class="ta-wrap"><textarea class="ta" placeholder="Type your feelings, a memory, or keywords…"></textarea></div>
+        <div class="tips">
+          <div class="tip"><span class="dot"></span><p>Describe your feelings or current mood</p></div>
+          <div class="tip"><span class="dot"></span><p>Share a memory or story</p></div>
+          <div class="tip"><span class="dot"></span><p>Or leave it empty for AI to be creative!</p></div>
+        </div>`;
+    }
+
+    else if (S.step==='create') {
+      const ti=S.theme??0, si=S.seed??0, mi=S.mood??0, vi=S.vocal??0;
+      const t=THEMES[ti], s=SEEDS[si], m=MOODS[mi], v=VOCALS[vi];
+      h = `<p class="sec-label">Review your song</p><div class="sum">
+        <div class="srow"><div class="ic"><img src="${timg(ti)}"></div><div><div class="lab">Theme</div><div class="val">${t.name}</div></div></div>
+        <div class="srow"><div class="ic"><img src="${simg(si)}"></div><div><div class="lab">Seed</div><div class="val">${s.name}</div></div></div>
+        <div class="srow"><div class="ic">${m.e}</div><div><div class="lab">Mood</div><div class="val">${m.l}</div></div></div>
+        <div class="srow"><div class="ic"><img src="${vimg(vi)}"></div><div><div class="lab">Vocal</div><div class="val">${v.n} · ${v.g}</div></div></div>
+        <div class="srow"><div class="ic">📷</div><div><div class="lab">Photo</div><div class="val muted">Not added (optional)</div></div></div>
+        <div class="srow"><div class="ic">✍️</div><div><div class="lab">Message</div><div class="val muted">None — AI will decide</div></div></div>
+      </div>`;
+    }
+
+    else if (S.step==='processing') {
+      h = `<div class="proc"><div class="orb">🎵</div>
+        <h2 style="font-size:19px;font-weight:700;margin-bottom:10px">Creating Your Song</h2>
+        <div class="ptrack"><div class="pfill" style="width:45%"></div></div>
+        <div style="font-size:12px;font-weight:600;color:var(--accent-light)">Generating lyrics…</div></div>`;
+    }
+
+    body.innerHTML = h;
+    wire();
+    updateNext();
+  }
+
+  function wire() {
+    body.querySelectorAll('[data-exp]').forEach(n=>n.onclick=()=>{ S.expand=S.expand===+n.dataset.exp?-1:+n.dataset.exp; render(); });
+    body.querySelectorAll('[data-pick]').forEach(n=>n.onclick=(e)=>{ e.stopPropagation(); S.theme=+n.dataset.pick; S.step='seed'; S.seed=null; S.genre='Pop'; render(); });
+    body.querySelectorAll('[data-jump2]').forEach(n=>n.onclick=()=>{ S.step=n.dataset.jump2; render(); });
+    body.querySelectorAll('[data-f]').forEach(n=>n.onclick=()=>{ S.genre=n.dataset.f; render(); });      // filter only, keeps seed
+    body.querySelectorAll('[data-detail]').forEach(n=>n.onclick=(e)=>{ e.stopPropagation(); openDetail('seed', +n.dataset.detail); });
+    body.querySelectorAll('[data-prev]').forEach(n=>n.onclick=(e)=>e.stopPropagation());
+    body.querySelectorAll('[data-si]').forEach(n=>n.onclick=()=>{ S.seed=+n.dataset.si; render(); });
+    body.querySelectorAll('[data-mood]').forEach(n=>n.onclick=()=>{ S.mood=+n.dataset.mood; render(); });
+    body.querySelectorAll('[data-vi]').forEach(n=>n.onclick=()=>{ S.vocal=+n.dataset.vi; render(); });
+    body.querySelectorAll('[data-vdetail]').forEach(n=>n.onclick=(e)=>{ e.stopPropagation(); openDetail('vocal', +n.dataset.vdetail); });
+  }
+
+  function canProceed() {
+    if (S.step==='theme') return S.theme!=null;
+    if (S.step==='seed') return S.seed!=null;
+    if (S.step==='mood') return S.mood!=null;
+    if (S.step==='vocal') return S.vocal!=null;
+    return true; // image & text optional
+  }
+  function updateNext() {
+    const ok = canProceed();
+    nextBtn.disabled = !ok;
+    nextBtn.textContent = S.step==='create' ? 'Create My Song'
+      : ok ? 'Next Step ›'
+      : S.step==='theme' ? 'Select a theme' : S.step==='seed' ? 'Choose a seed'
+      : S.step==='mood' ? 'Choose a mood' : S.step==='vocal' ? 'Choose a vocal' : 'Next Step ›';
+  }
+  nextBtn.onclick = () => {
+    if (!canProceed()) return;
+    if (S.step==='create') { S.step='processing'; render(); return; }
+    const i = ORDER.indexOf(S.step);
+    if (i < ORDER.length-1) { S.step = ORDER[i+1]; render(); }
+  };
+
+  // ---- Seed detail: liff full-screen page ----
+  function waveBars(seedId) {
+    let s = 0; for (const ch of seedId) s = (s*31 + ch.charCodeAt(0)) >>> 0;
+    const rand = () => { s = (s*1664525 + 1013904223) >>> 0; return s/0xffffffff; };
+    const played = 0.34;
+    return Array.from({length:56}, (_,i) => {
+      const h = 12 + (Math.abs(Math.sin(i*0.55))*0.55 + rand()*0.3) * 88;
+      const on = i/56 <= played;
+      return `<i style="height:${Math.round(h)}%;background:${on?'var(--accent)':'rgba(255,255,255,.15)'}"></i>`;
+    }).join('');
+  }
+  // One detail page for both seeds and vocals (same liff layout, different meta fields).
+  function openDetail(kind, i) {
+    const isSeed = kind==='seed';
+    const it = isSeed ? SEEDS[i] : VOCALS[i];
+    const img = isSeed ? simg(i) : vimg(i);
+    const name = isSeed ? it.name : it.n;
+    const desc = isSeed ? it.description : it.d;
+    const id = isSeed ? it.id : ('vocal'+i);
+    const meta = isSeed
+      ? [{lab:'License',val:it.license},{lab:'Provider',val:it.provider}]
+      : [{lab:'Gender',val:it.g}];
+    detail.innerHTML = `
+      <button class="back" data-close>‹</button>
+      <div class="hero" style="background-image:linear-gradient(to bottom, rgba(9,9,14,.15) 0%, rgba(9,9,14,.55) 55%, #09090e 100%), url('${img}')"></div>
+      <div class="d-body">
+        <div class="d-thumb"><img src="${img}"><div class="d-brand"><img src="assets/1pro-icon.png" alt="1Pro"></div><div class="d-name-ov">${name}</div></div>
+        <div class="d-content">
+          <div class="d-desc">${desc}</div>
+          <div class="d-meta">${meta.map(m=>`<div><div class="lab">${m.lab}</div><div class="val">${m.val}</div></div>`).join('')}</div>
+          <div class="d-prev-lab">Preview</div>
+          <div class="d-player"><div class="d-play">▶</div><div class="wave">${waveBars(id)}</div><span class="d-time">0:32</span></div>
+          <button class="d-select" data-use>Select</button>
+        </div>
+      </div>`;
+    detail.querySelector('[data-close]').onclick = closeDetail;
+    detail.querySelector('[data-use]').onclick = () => { if (isSeed) S.seed = i; else S.vocal = i; closeDetail(); render(); };
+    detail.classList.add('show');
+  }
+  function closeDetail() { detail.classList.remove('show'); }
+
+  // preview hooks
+  const P = new URLSearchParams(location.search);
+  if (P.get('step')) { S.theme=0; S.genre='Pop'; S.seed=0; S.mood=0; S.vocal=0; S.step=P.get('step'); }
+  else { S.step='theme'; S.expand=0; }
+  render();
+  if (P.get('detail')!==null) openDetail('seed', +P.get('detail')||0);
+  if (P.get('vdetail')!==null) openDetail('vocal', +P.get('vdetail')||0);
+</script>
+</body>
+</html>
