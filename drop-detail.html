@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>1Pro Studio — Drop Detail proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<style>
+  .page { max-width: 1040px; margin: 0 auto; padding: 44px 24px 80px; position: relative; }
+  .eyebrow { font-family: ui-monospace, Menlo, monospace; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  h1 { font-size: clamp(24px,4vw,30px); font-weight: 800; letter-spacing: -.02em; margin-bottom: 10px; }
+  .lede { color: var(--text-secondary); font-size: 15px; max-width: 64ch; line-height: 1.6; }
+  .lede b { color: var(--text-primary); }
+  .cols { display: grid; grid-template-columns: 320px 1fr; gap: 40px; align-items: start; margin-top: 34px; }
+  @media (max-width: 820px) { .cols { grid-template-columns: 1fr; } }
+  .sechd { font-family: ui-monospace, monospace; font-size: 12px; letter-spacing: .06em; color: var(--accent); margin-bottom: 12px; }
+
+  /* Current cramped menu illustration */
+  .menu { border: 1px solid var(--border-md); border-radius: 16px; overflow: hidden; background: rgba(28,28,30,.7); backdrop-filter: blur(10px); }
+  .mi { display: flex; align-items: center; gap: 10px; padding: 11px 14px; font-size: 13px; color: rgba(255,255,255,.85); border-bottom: 1px solid rgba(255,255,255,.05); }
+  .mi:last-child { border-bottom: 0; }
+  .mi.edit { color: var(--accent-light); } .mi.warn { color: #ff8f8f; }
+  .mi svg { width: 15px; height: 15px; flex-shrink: 0; }
+  .curcap { color: var(--text-muted); font-size: 13px; line-height: 1.55; margin-top: 14px; }
+  .curcap b { color: #ff9a9a; }
+
+  .why { margin-top: 26px; padding: 16px 18px; background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 16px; }
+  .why h3 { font-size: 13.5px; margin-bottom: 10px; }
+  .why ul { margin: 0; padding-left: 16px; }
+  .why li { color: var(--text-secondary); font-size: 13px; line-height: 1.75; margin-bottom: 4px; }
+  .why b { color: var(--text-primary); }
+
+  /* Detail page (reuses seed-detail language) */
+  .frame { width: 340px; height: 720px; border-radius: 40px; border: 9px solid #16161c; box-shadow: 0 30px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.04) inset; overflow: hidden; position: relative; background: #09090e; }
+  .screen { position: absolute; inset: 0; overflow-y: auto; }
+  .screen::-webkit-scrollbar { display: none; }
+  .hero { position: absolute; inset-inline: 0; top: 0; height: 58%; pointer-events: none; background-size: cover; background-position: center; filter: saturate(1.1); }
+  .hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(9,9,14,.15) 0%, rgba(9,9,14,.55) 55%, #09090e 100%); }
+  .back { position: absolute; top: 14px; left: 14px; z-index: 5; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,0,0,.45); backdrop-filter: blur(6px); border: none; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .kebab { position: absolute; top: 14px; right: 14px; z-index: 5; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,0,0,.45); backdrop-filter: blur(6px); border: none; color: #fff; display: flex; align-items: center; justify-content: center; }
+  .back svg, .kebab svg { width: 18px; height: 18px; }
+
+  .d-body { position: relative; display: flex; flex-direction: column; align-items: center; padding: 74px 18px 30px; }
+  .d-thumb { width: 186px; height: 186px; border-radius: 18px; overflow: hidden; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,.6); outline: 1px solid rgba(255,255,255,.15); }
+  .d-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .d-brand { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(135deg,#F58F22,#7c3aed); box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+  .cover-edit { position: absolute; right: 8px; bottom: 8px; display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 999px; background: rgba(0,0,0,.55); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.18); color: #fff; font-size: 11px; font-weight: 700; cursor: pointer; }
+  .cover-edit svg { width: 12px; height: 12px; }
+
+  .d-title { display: flex; align-items: center; gap: 8px; margin-top: 18px; }
+  .d-title h2 { font-size: 20px; font-weight: 800; }
+  .pen { display: inline-flex; align-items: center; justify-content: center; width: 27px; height: 27px; border-radius: 8px; border: 1px solid var(--border-md); background: transparent; color: #fff; cursor: pointer; flex-shrink: 0; }
+  .pen svg { width: 13px; height: 13px; }
+  .d-artist { display: flex; align-items: center; gap: 8px; margin-top: 7px; }
+  .d-artist .h { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.72); }
+  .d-artist .mini { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--border-md); color: #fff; font-size: 11px; font-weight: 700; cursor: pointer; }
+  .d-artist .mini svg { width: 10px; height: 10px; }
+
+  .d-player { width: 100%; margin-top: 20px; display: flex; align-items: center; gap: 12px; border-radius: 16px; background: var(--bg-card); border: 1px solid var(--border-md); padding: 11px 12px; }
+  .d-play { width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .d-play svg { width: 15px; height: 15px; }
+  .wave { flex: 1; display: flex; align-items: center; gap: 2px; height: 34px; }
+  .wave i { flex: 1; border-radius: 999px; background: rgba(255,255,255,.16); }
+  .wave i.on { background: var(--accent); }
+  .d-time { font-size: 12px; color: var(--text-muted); flex-shrink: 0; font-variant-numeric: tabular-nums; }
+
+  .metas { width: 100%; margin-top: 18px; border-radius: 16px; background: var(--bg-card); border: 1px solid var(--border-md); overflow: hidden; }
+  .meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 15px; }
+  .meta + .meta { border-top: 1px solid var(--border); }
+  .meta .lab { font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+  .meta .val { font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .meta .val svg { width: 13px; height: 13px; color: var(--text-muted); }
+  .meta.tap .val { color: var(--accent-light); }
+
+  .lyr { width: 100%; margin-top: 22px; text-align: left; }
+  .lyr .lab { font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; margin-bottom: 8px; }
+  .lyr p { font-size: 14px; line-height: 2; color: rgba(255,255,255,.82); }
+
+  .acts { width: 100%; margin-top: 22px; display: flex; gap: 9px; }
+  .act { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 12px 0; border-radius: 14px; background: var(--bg-card); border: 1px solid var(--border-md); font-size: 11px; font-weight: 700; color: #fff; cursor: pointer; }
+  .act svg { width: 17px; height: 17px; }
+  .act.del { color: #ff8f8f; }
+</style>
+</head>
+<body>
+<div class="app-ambient" style="position:fixed"></div>
+<div class="page">
+  <div class="eyebrow">Proposal · Drop detail page</div>
+  <h1>Drops có quá nhiều chức năng sửa — tách thành trang detail riêng</h1>
+  <p class="lede">Menu ⋯ hiện nhồi 8 hành động, trong đó có <b>sửa tên / artist / mô tả</b> và <b>crop bìa</b>. Càng thêm tính năng, popup càng chật và khó bấm, lại không xem được nội dung drop. Đề xuất trang <b>Drop detail</b> riêng — dựng đúng phong cách trang seed / vocal đã có: vừa xem đầy đủ, vừa sửa tại chỗ, vừa đẹp.</p>
+
+  <div class="cols">
+    <!-- LEFT: current problem -->
+    <div>
+      <div class="sechd">① HIỆN TẠI — menu ⋯</div>
+      <div class="menu">
+        <div class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 5v14l11-7z"/></svg>再生</div>
+        <div class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h11M4 12h11M4 18h7M17 12v7M14 15h6"/></svg>キューに追加</div>
+        <div class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h11M4 12h11M4 18h7M18 14v6M15 17h6"/></svg>コレクションに追加</div>
+        <div class="mi edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>タイトル / アーティスト編集</div>
+        <div class="mi edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>カバー画像を編集 (crop)</div>
+        <div class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13"/></svg>共有</div>
+        <div class="mi warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg>ここから削除</div>
+        <div class="mi warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg>ゴミ箱へ</div>
+      </div>
+      <p class="curcap">8 mục nhồi 1 popup — 2 mục sửa (✎) lẫn 2 mục xoá. <b>Thêm tính năng nữa là vỡ.</b></p>
+
+      <div class="why">
+        <h3>Vì sao trang detail hợp lý hơn</h3>
+        <ul>
+          <li><b>Sửa có ngữ cảnh</b> — bấm ✎ ngay cạnh tên / artist / bìa, thấy thứ đang sửa.</li>
+          <li><b>Xem đầy đủ</b> — bìa lớn, phát thử, lyrics, seed / mood / vocal.</li>
+          <li><b>Dễ mở rộng</b> — tính năng mới chỉ là thêm 1 khối, menu không vỡ.</li>
+          <li><b>Đồng bộ</b> — dùng lại hero + metadata của trang seed / vocal.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- RIGHT: proposed detail page -->
+    <div>
+      <div class="sechd">② ĐỀ XUẤT — trang Drop detail</div>
+      <div class="frame">
+        <div class="screen scrollbar-hide">
+          <div class="hero" style="background-image:url('https://s3.ap-northeast-1.amazonaws.com/1-pro-studio/images/Ufee1b5ba3cd1e84aaa5fe50ed7867262/t3pViD6vMKHNGr7YA23ML.jpg')"></div>
+          <button class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <button class="kebab"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
+
+          <div class="d-body">
+            <div class="d-thumb">
+              <img src="https://s3.ap-northeast-1.amazonaws.com/1-pro-studio/images/Ufee1b5ba3cd1e84aaa5fe50ed7867262/t3pViD6vMKHNGr7YA23ML.jpg" alt="">
+              <div class="d-brand"></div>
+              <button class="cover-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>編集</button>
+            </div>
+
+            <div class="d-title"><h2>淡い青の果て</h2>
+              <button class="pen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button></div>
+            <div class="d-artist"><span class="h">ONEPro63440</span>
+              <button class="mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>編集</button></div>
+
+            <div class="d-player">
+              <div class="d-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+              <div class="wave" id="wave"></div>
+              <span class="d-time">1:12</span>
+            </div>
+
+            <div class="metas">
+              <div class="meta tap"><span class="lab">シード</span><span class="val">TEST <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span></div>
+              <div class="meta"><span class="lab">ムード</span><span class="val">😢 Sad</span></div>
+              <div class="meta tap"><span class="lab">ボーカル</span><span class="val">Female <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span></div>
+              <div class="meta"><span class="lab">ライセンス</span><span class="val" style="text-transform:uppercase;font-size:11px">Non-commercial</span></div>
+            </div>
+
+            <div class="lyr">
+              <div class="lab">歌詞</div>
+              <p>空はただ青すぎて<br>私の手をすり抜ける<br>冷たい風が吹く街で<br>君の影を探している<br>消えないであの日の温もり<br>果てしない青に溶けていく</p>
+            </div>
+
+            <div class="acts">
+              <div class="act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13"/></svg>共有</div>
+              <div class="act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h13M4 12h13M4 18h8M18 14v6M15 17h6"/></svg>追加</div>
+              <div class="act del"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg>削除</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const w = document.getElementById('wave'); let h = '';
+  for (let i = 0; i < 40; i++) { const on = i < 15 ? 'on' : ''; const ht = 16 + Math.round(Math.abs(Math.sin(i * 0.9)) * 74); h += `<i class="${on}" style="height:${ht}%"></i>`; }
+  w.innerHTML = h;
+</script>
+</body>
+</html>
