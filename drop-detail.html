@@ -40,7 +40,7 @@
   .d-artist .mini svg { width: 10px; height: 10px; }
 
   .d-player { width: 100%; margin-top: 20px; display: flex; align-items: center; gap: 12px; border-radius: 16px; background: var(--bg-card); border: 1px solid var(--border-md); padding: 11px 12px; }
-  .d-play { width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .d-play { width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 0; cursor: pointer; padding: 0; }
   .d-play svg { width: 15px; height: 15px; }
   .wave { flex: 1; display: flex; align-items: center; gap: 2px; height: 34px; }
   .wave i { flex: 1; border-radius: 999px; background: rgba(255,255,255,.16); }
@@ -63,6 +63,52 @@
   .act { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 12px 0; border-radius: 14px; background: var(--bg-card); border: 1px solid var(--border-md); font-size: 11px; font-weight: 700; color: #fff; cursor: pointer; }
   .act svg { width: 17px; height: 17px; }
   .act.del { color: #ff8f8f; }
+
+  /* Interaction feedback */
+  .pen, .mini, .cover-edit, .act, .d-play, .meta.tap, .back, .kebab { transition: transform .08s, filter .12s, background .15s; }
+  .pen:active, .mini:active, .cover-edit:active, .act:active, .d-play:active, .back:active, .kebab:active { transform: scale(.93); }
+  .meta.tap { cursor: pointer; } .meta.tap:active { background: rgba(255,255,255,.05); }
+  .d-play.playing svg { transform: none; }
+
+  /* Inline edit */
+  .edit-wrap { display: flex; align-items: center; gap: 7px; margin-top: 4px; width: 100%; }
+  .edit-in { flex: 1; min-width: 0; background: rgba(255,255,255,.06); border: 1px solid rgba(245,143,34,.4); border-radius: 10px; padding: 8px 11px; font-size: 15px; color: #fff; font-family: inherit; outline: none; }
+  .edit-in.sm { font-size: 13px; }
+  .edit-save { padding: 8px 14px; border-radius: 10px; background: var(--accent); color: #0d0d11; font-weight: 700; font-size: 13px; border: 0; cursor: pointer; flex-shrink: 0; }
+  .edit-save:disabled { opacity: .45; cursor: default; }
+  .edit-x { padding: 8px; border-radius: 10px; background: transparent; border: 1px solid var(--border-md); color: var(--text-muted); cursor: pointer; flex-shrink: 0; display: inline-flex; }
+  .edit-x svg { width: 14px; height: 14px; }
+
+  /* Kebab dropdown */
+  .pop { position: absolute; top: 54px; right: 16px; z-index: 40; width: 190px; background: rgba(24,24,28,.96); backdrop-filter: blur(14px); border: 1px solid var(--border-md); border-radius: 14px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.5); animation: pop .12s ease; }
+  @keyframes pop { from { opacity: 0; transform: translateY(-6px) scale(.97); } }
+  .pop-i { width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 14px; font-size: 13px; color: #fff; background: transparent; border: 0; border-bottom: 1px solid rgba(255,255,255,.05); cursor: pointer; text-align: left; }
+  .pop-i:last-child { border-bottom: 0; } .pop-i:active { background: rgba(255,255,255,.06); }
+  .pop-i svg { width: 15px; height: 15px; flex-shrink: 0; } .pop-i.danger { color: #ff8f8f; }
+
+  /* Overlays / modals */
+  .overlay:not([hidden]) { position: absolute; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(4,4,7,.6); backdrop-filter: blur(6px); animation: fade .15s ease; }
+  @keyframes fade { from { opacity: 0; } }
+  .modal { width: 100%; background: rgba(20,20,26,.94); border: 1px solid var(--border-md); border-radius: 20px; padding: 16px; box-shadow: 0 24px 60px rgba(0,0,0,.6); animation: rise .16s ease; }
+  @keyframes rise { from { transform: translateY(10px); opacity: 0; } }
+  .crop-stage { position: relative; width: 100%; aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: #000; touch-action: none; cursor: grab; }
+  .crop-stage:active { cursor: grabbing; }
+  .crop-stage img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; will-change: transform; }
+  .crop-stage::after { content: ''; position: absolute; inset: 0; pointer-events: none; box-shadow: 0 0 0 1px rgba(255,255,255,.15) inset; border-radius: 14px;
+    background-image: linear-gradient(rgba(255,255,255,.14) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.14) 1px, transparent 1px);
+    background-size: 33.33% 33.33%; }
+  .modal-btns { display: flex; gap: 9px; margin-top: 14px; }
+  .mbtn { flex: 1; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 700; border: 0; cursor: pointer; }
+  .mbtn.ghost { background: rgba(255,255,255,.06); color: #fff; border: 1px solid var(--border-md); }
+  .mbtn.primary { background: var(--accent); color: #0d0d11; }
+  .mbtn.danger { background: #e5484d; color: #fff; }
+  .confirm { text-align: center; padding: 22px 18px 16px; }
+  .c-title { font-size: 16px; font-weight: 800; }
+  .c-sub { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+
+  /* Toast */
+  .toast { position: absolute; left: 50%; bottom: 26px; transform: translate(-50%, 20px); z-index: 60; background: rgba(20,20,26,.96); border: 1px solid var(--border-md); color: #fff; font-size: 13px; font-weight: 600; padding: 10px 16px; border-radius: 999px; box-shadow: 0 10px 30px rgba(0,0,0,.5); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
 </style>
 </head>
 <body>
@@ -73,31 +119,31 @@
     <div class="frame">
         <div class="screen scrollbar-hide">
           <div class="hero" id="hero"></div>
-          <button class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
-          <button class="kebab"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
+          <button class="back" id="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <button class="kebab" id="kebab"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
 
           <div class="d-body">
             <div class="d-thumb">
               <img id="cover" crossorigin="anonymous" src="https://picsum.photos/id/29/1000/1000" alt="">
               <div class="d-brand"><img src="assets/1pro-icon.png" alt="1Pro"></div>
-              <button class="cover-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>Edit</button>
+              <button class="cover-edit" id="cropBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>Edit</button>
             </div>
 
-            <div class="d-title"><h2>Pale Blue Horizon</h2>
-              <button class="pen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button></div>
-            <div class="d-artist"><span class="h">ONEPro63440</span>
-              <button class="mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>Edit</button></div>
+            <div class="d-title"><h2 id="title">Pale Blue Horizon</h2>
+              <button class="pen" id="editTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button></div>
+            <div class="d-artist"><span class="h" id="artist">ONEPro63440</span>
+              <button class="mini" id="editArtist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>Edit</button></div>
 
             <div class="d-player">
-              <div class="d-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+              <button class="d-play" id="playBtn" aria-label="Play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
               <div class="wave" id="wave"></div>
-              <span class="d-time">1:12</span>
+              <span class="d-time" id="time">0:00</span>
             </div>
 
             <div class="metas">
-              <div class="meta tap"><span class="lab">Seed</span><span class="val">Frozen Peak <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span></div>
+              <div class="meta tap" id="seedRow"><span class="lab">Seed</span><span class="val">Frozen Peak <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span></div>
               <div class="meta"><span class="lab">Mood</span><span class="val">😢 Sad</span></div>
-              <div class="meta tap"><span class="lab">Vocal</span><span class="val">Female <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span></div>
+              <div class="meta tap" id="vocalRow"><span class="lab">Vocal</span><span class="val">Female <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span></div>
               <div class="meta"><span class="lab">License</span><span class="val" style="text-transform:uppercase;font-size:11px">Non-commercial</span></div>
             </div>
 
@@ -107,34 +153,102 @@
             </div>
 
             <div class="acts">
-              <div class="act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13"/></svg>Share</div>
-              <div class="act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h13M4 12h13M4 18h8M18 14v6M15 17h6"/></svg>Add</div>
-              <div class="act del"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg>Delete</div>
+              <button class="act" id="shareBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13"/></svg>Share</button>
+              <button class="act" id="addBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h13M4 12h13M4 18h8M18 14v6M15 17h6"/></svg>Add</button>
+              <button class="act del" id="delBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg>Delete</button>
             </div>
           </div>
         </div>
+
+        <!-- Kebab dropdown -->
+        <div class="pop" id="menu" hidden>
+          <button class="pop-i" data-act="queue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h11M4 12h11M4 18h7M17 12v7M14 15h6"/></svg>Add to queue</button>
+          <button class="pop-i" data-act="collection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h13M4 12h13M4 18h8M18 14v6M15 17h6"/></svg>Add to collection</button>
+          <button class="pop-i danger" data-act="delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg>Delete</button>
+        </div>
+
+        <!-- Crop cover modal (1:1, drag to reposition) -->
+        <div class="overlay" id="cropOverlay" hidden>
+          <div class="modal">
+            <div class="crop-stage" id="cropStage"><img id="cropImg" crossorigin="anonymous" src="https://picsum.photos/id/29/1000/1000" alt=""></div>
+            <div class="modal-btns">
+              <button class="mbtn ghost" id="cropCancel">Cancel</button>
+              <button class="mbtn primary" id="cropApply">Apply</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Delete confirm -->
+        <div class="overlay" id="confirmOverlay" hidden>
+          <div class="modal confirm">
+            <div class="c-title">Delete this drop?</div>
+            <div class="c-sub">This can't be undone.</div>
+            <div class="modal-btns">
+              <button class="mbtn ghost" id="delCancel">Cancel</button>
+              <button class="mbtn danger" id="delConfirm">Delete</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="toast" id="toast"></div>
       </div>
   </div>
 </div>
 <script>
-  // Fake waveform
-  const w = document.getElementById('wave'); let h = '';
-  for (let i = 0; i < 40; i++) { const on = i < 15 ? 'on' : ''; const ht = 16 + Math.round(Math.abs(Math.sin(i * 0.9)) * 74); h += `<i class="${on}" style="height:${ht}%"></i>`; }
-  w.innerHTML = h;
+  const $ = (id) => document.getElementById(id);
 
-  // Dominant-color header band — same idea as the seed/vocal detail page:
-  // sample the cover, ignore near-black/near-white pixels, pick the most frequent color bucket.
-  const hero = document.getElementById('hero');
-  const img = document.getElementById('cover');
-  const paint = (hex) => { hero.style.background = `linear-gradient(to bottom, ${hex}cc 0%, ${hex}66 60%, #09090e 100%)`; };
-  const extract = () => {
+  /* ---------- Toast ---------- */
+  const toastEl = $('toast'); let toastT;
+  const toast = (msg) => {
+    toastEl.textContent = msg; toastEl.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('show'), 1600);
+  };
+
+  /* ---------- Waveform + play simulation ---------- */
+  const wave = $('wave'), DURATION = 72; const bars = [];
+  for (let i = 0; i < 40; i++) {
+    const b = document.createElement('i');
+    b.style.height = (16 + Math.round(Math.abs(Math.sin(i * 0.9)) * 74)) + '%';
+    wave.appendChild(b); bars.push(b);
+  }
+  const playBtn = $('playBtn'), timeEl = $('time');
+  const ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+  const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+  const fmt = (t) => Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
+  let playing = false, t = 0, last = 0, raf;
+  const render = () => {
+    const done = Math.round((t / DURATION) * bars.length);
+    bars.forEach((b, i) => b.classList.toggle('on', i < done));
+    timeEl.textContent = fmt(t);
+  };
+  const tick = (now) => {
+    if (!playing) return;
+    t += (now - last) / 1000; last = now;
+    if (t >= DURATION) { t = 0; stop(); render(); return; }
+    render(); raf = requestAnimationFrame(tick);
+  };
+  const stop = () => { playing = false; playBtn.innerHTML = ICON_PLAY; cancelAnimationFrame(raf); };
+  playBtn.onclick = () => {
+    playing = !playing;
+    if (playing) { playBtn.innerHTML = ICON_PAUSE; last = performance.now(); raf = requestAnimationFrame(tick); }
+    else stop();
+  };
+  wave.parentElement.addEventListener('click', (e) => {                 // seek by tapping the waveform
+    if (e.target === playBtn || playBtn.contains(e.target)) return;
+    const r = wave.getBoundingClientRect(); t = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * DURATION; render();
+  });
+  render();
+
+  /* ---------- Dominant-color header band (mirrors seed/vocal detail) ---------- */
+  const hero = $('hero'), cover = $('cover');
+  const extract = (el) => {
     try {
       const s = 64, c = document.createElement('canvas'); c.width = c.height = s;
-      const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, s, s);
+      const ctx = c.getContext('2d'); ctx.drawImage(el, 0, 0, s, s);
       const d = ctx.getImageData(0, 0, s, s).data, buckets = {};
       for (let i = 0; i < d.length; i += 4) {
         const r = d[i], g = d[i + 1], b = d[i + 2];
-        if (Math.max(r, g, b) < 60 || Math.min(r, g, b) > 215) continue; // skip shadows & highlights
+        if (Math.max(r, g, b) < 60 || Math.min(r, g, b) > 215) continue;   // skip shadows & highlights
         const k = (r >> 4) + '.' + (g >> 4) + '.' + (b >> 4);
         const bk = buckets[k] || (buckets[k] = { n: 0, r: 0, g: 0, b: 0 });
         bk.n++; bk.r += r; bk.g += g; bk.b += b;
@@ -142,10 +256,74 @@
       let best = null; for (const k in buckets) if (!best || buckets[k].n > best.n) best = buckets[k];
       if (!best) return;
       const hx = (n) => Math.round(n).toString(16).padStart(2, '0');
-      paint('#' + hx(best.r / best.n) + hx(best.g / best.n) + hx(best.b / best.n));
-    } catch (e) { /* CORS-tainted canvas: keep the neutral fallback gradient */ }
+      hero.style.background = `linear-gradient(to bottom, #${hx(best.r / best.n)}${hx(best.g / best.n)}${hx(best.b / best.n)}cc 0%, #${hx(best.r / best.n)}${hx(best.g / best.n)}${hx(best.b / best.n)}66 60%, #09090e 100%)`;
+    } catch (e) { /* CORS-tainted canvas: keep neutral fallback */ }
   };
-  if (img.complete) extract(); else img.addEventListener('load', extract);
+  if (cover.complete) extract(cover); else cover.addEventListener('load', () => extract(cover));
+
+  /* ---------- Inline edit (title / artist) — like the real LIFF field ---------- */
+  const startEdit = (row, valueEl, max, sm, label) => {
+    if (row.nextElementSibling && row.nextElementSibling.classList.contains('edit-wrap')) return;
+    row.style.display = 'none';
+    const wrap = document.createElement('div'); wrap.className = 'edit-wrap';
+    const input = document.createElement('input');
+    input.className = 'edit-in' + (sm ? ' sm' : ''); input.maxLength = max; input.value = valueEl.textContent.trim();
+    const save = document.createElement('button'); save.className = 'edit-save'; save.textContent = 'Save';
+    const x = document.createElement('button'); x.className = 'edit-x';
+    x.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    wrap.append(input, save, x); row.after(wrap);
+    input.focus(); input.select();
+    const close = () => { wrap.remove(); row.style.display = ''; };
+    const commit = () => { const v = input.value.trim(); if (!v) return; valueEl.textContent = v; close(); toast(label + ' updated'); };
+    save.onclick = commit; x.onclick = close;
+    input.oninput = () => save.disabled = !input.value.trim();
+    input.onkeydown = (e) => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') close(); };
+  };
+  $('editTitle').onclick = () => startEdit($('editTitle').parentElement, $('title'), 60, false, 'Title');
+  $('editArtist').onclick = () => startEdit($('editArtist').parentElement, $('artist'), 40, true, 'Artist name');
+
+  /* ---------- Crop cover (1:1, drag to reposition) ---------- */
+  const cropOverlay = $('cropOverlay'), cropImg = $('cropImg'), stage = $('cropStage');
+  const Z = 1.3, LIM = ((Z - 1) / (2 * Z)) * 100;        // max pan % that still fully covers the frame
+  let pos = { x: 0, y: 0 };                               // committed cover position
+  let cur = { x: 0, y: 0 }, drag = null;
+  const applyImg = (el, p) => el.style.transform = `scale(${Z}) translate(${p.x}%, ${p.y}%)`;
+  const clamp = (v) => Math.max(-LIM, Math.min(LIM, v));
+  $('cropBtn').onclick = () => { cur = { ...pos }; applyImg(cropImg, cur); cropOverlay.hidden = false; };
+  $('cropCancel').onclick = () => cropOverlay.hidden = true;
+  $('cropApply').onclick = () => { pos = { ...cur }; applyImg(cover, pos); cropOverlay.hidden = true; extract(cover); toast('Cover updated'); };
+  stage.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, ox: cur.x, oy: cur.y }; stage.setPointerCapture(e.pointerId); });
+  stage.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const rect = stage.getBoundingClientRect();
+    cur.x = clamp(drag.ox + ((e.clientX - drag.x) / rect.width) * 100 / Z);
+    cur.y = clamp(drag.oy + ((e.clientY - drag.y) / rect.height) * 100 / Z);
+    applyImg(cropImg, cur);
+  });
+  stage.addEventListener('pointerup', () => drag = null);
+  cover.style.transition = 'transform .2s';
+
+  /* ---------- Kebab menu ---------- */
+  const menu = $('menu');
+  $('kebab').onclick = (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; };
+  document.addEventListener('click', (e) => { if (!menu.hidden && !menu.contains(e.target) && e.target !== $('kebab')) menu.hidden = true; });
+  menu.querySelectorAll('.pop-i').forEach((b) => b.onclick = () => {
+    menu.hidden = true;
+    const a = b.dataset.act;
+    if (a === 'queue') toast('Added to queue');
+    else if (a === 'collection') toast('Added to collection');
+    else if (a === 'delete') $('confirmOverlay').hidden = false;
+  });
+
+  /* ---------- Metadata navigation + actions ---------- */
+  $('seedRow').onclick = () => toast('Opening seed · Frozen Peak');
+  $('vocalRow').onclick = () => toast('Opening vocal · Female');
+  $('shareBtn').onclick = () => toast('Link copied');
+  $('addBtn').onclick = () => toast('Added to collection');
+  $('back').onclick = () => toast('Back to collection');
+  $('delBtn').onclick = () => $('confirmOverlay').hidden = false;
+  $('delCancel').onclick = () => $('confirmOverlay').hidden = true;
+  $('delConfirm').onclick = () => { $('confirmOverlay').hidden = true; toast('Drop deleted'); };
 </script>
 </body>
 </html>
