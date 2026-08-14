@@ -9,29 +9,8 @@
 <link rel="stylesheet" href="styles.css" />
 <style>
   .page { max-width: 1040px; margin: 0 auto; padding: 44px 24px 80px; position: relative; }
-  .eyebrow { font-family: ui-monospace, Menlo, monospace; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
-  h1 { font-size: clamp(24px,4vw,30px); font-weight: 800; letter-spacing: -.02em; margin-bottom: 10px; }
-  .lede { color: var(--text-secondary); font-size: 15px; max-width: 64ch; line-height: 1.6; }
-  .lede b { color: var(--text-primary); }
-  .cols { display: grid; grid-template-columns: 320px 1fr; gap: 40px; align-items: start; margin-top: 34px; }
-  @media (max-width: 820px) { .cols { grid-template-columns: 1fr; } }
-  .sechd { font-family: ui-monospace, monospace; font-size: 12px; letter-spacing: .06em; color: var(--accent); margin-bottom: 12px; }
-
-  /* Current cramped menu illustration */
-  .menu { border: 1px solid var(--border-md); border-radius: 16px; overflow: hidden; background: rgba(28,28,30,.7); backdrop-filter: blur(10px); }
-  .mi { display: flex; align-items: center; gap: 10px; padding: 11px 14px; font-size: 13px; color: rgba(255,255,255,.85); border-bottom: 1px solid rgba(255,255,255,.05); }
-  .mi:last-child { border-bottom: 0; }
-  .mi.edit { color: var(--accent-light); } .mi.warn { color: #ff8f8f; }
-  .mi svg { width: 15px; height: 15px; flex-shrink: 0; }
-  .curcap { color: var(--text-muted); font-size: 13px; line-height: 1.55; margin-top: 14px; }
-  .curcap b { color: #ff9a9a; }
-
-  .why { margin-top: 26px; padding: 16px 18px; background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 16px; }
-  .why h3 { font-size: 13.5px; margin-bottom: 10px; }
-  .why ul { margin: 0; padding-left: 16px; }
-  .why li { color: var(--text-secondary); font-size: 13px; line-height: 1.75; margin-bottom: 4px; }
-  .why b { color: var(--text-primary); }
-
+  .stage { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .eyebrow { font-family: ui-monospace, Menlo, monospace; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); text-align: center; }
   /* Detail page (reuses seed-detail language) */
   .frame { width: 340px; height: 720px; border-radius: 40px; border: 9px solid #16161c; box-shadow: 0 30px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.04) inset; overflow: hidden; position: relative; background: #09090e; }
   .screen { position: absolute; inset: 0; overflow-y: auto; }
@@ -87,49 +66,17 @@
 <body>
 <div class="app-ambient" style="position:fixed"></div>
 <div class="page">
-  <div class="eyebrow">Proposal · Drop detail page</div>
-  <h1>Drops có quá nhiều chức năng sửa — tách thành trang detail riêng</h1>
-  <p class="lede">Menu ⋯ hiện nhồi 8 hành động, trong đó có <b>sửa tên / artist / mô tả</b> và <b>crop bìa</b>. Càng thêm tính năng, popup càng chật và khó bấm, lại không xem được nội dung drop. Đề xuất trang <b>Drop detail</b> riêng — dựng đúng phong cách trang seed / vocal đã có: vừa xem đầy đủ, vừa sửa tại chỗ, vừa đẹp.</p>
-
-  <div class="cols">
-    <!-- LEFT: current problem -->
-    <div>
-      <div class="sechd">① HIỆN TẠI — menu ⋯</div>
-      <div class="menu">
-        <div class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 5v14l11-7z"/></svg>再生</div>
-        <div class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h11M4 12h11M4 18h7M17 12v7M14 15h6"/></svg>キューに追加</div>
-        <div class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h11M4 12h11M4 18h7M18 14v6M15 17h6"/></svg>コレクションに追加</div>
-        <div class="mi edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>タイトル / アーティスト編集</div>
-        <div class="mi edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>カバー画像を編集 (crop)</div>
-        <div class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13"/></svg>共有</div>
-        <div class="mi warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg>ここから削除</div>
-        <div class="mi warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg>ゴミ箱へ</div>
-      </div>
-      <p class="curcap">8 mục nhồi 1 popup — 2 mục sửa (✎) lẫn 2 mục xoá. <b>Thêm tính năng nữa là vỡ.</b></p>
-
-      <div class="why">
-        <h3>Vì sao trang detail hợp lý hơn</h3>
-        <ul>
-          <li><b>Sửa có ngữ cảnh</b> — bấm ✎ ngay cạnh tên / artist / bìa, thấy thứ đang sửa.</li>
-          <li><b>Xem đầy đủ</b> — bìa lớn, phát thử, lyrics, seed / mood / vocal.</li>
-          <li><b>Dễ mở rộng</b> — tính năng mới chỉ là thêm 1 khối, menu không vỡ.</li>
-          <li><b>Đồng bộ</b> — dùng lại hero + metadata của trang seed / vocal.</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- RIGHT: proposed detail page -->
-    <div>
-      <div class="sechd">② ĐỀ XUẤT — trang Drop detail</div>
-      <div class="frame">
+  <div class="stage">
+    <div class="eyebrow">Drop detail</div>
+    <div class="frame">
         <div class="screen scrollbar-hide">
-          <div class="hero" style="background-image:url('https://s3.ap-northeast-1.amazonaws.com/1-pro-studio/images/Ufee1b5ba3cd1e84aaa5fe50ed7867262/t3pViD6vMKHNGr7YA23ML.jpg')"></div>
+          <div class="hero" style="background-image:url('https://picsum.photos/id/29/1000/1000')"></div>
           <button class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
           <button class="kebab"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
 
           <div class="d-body">
             <div class="d-thumb">
-              <img src="https://s3.ap-northeast-1.amazonaws.com/1-pro-studio/images/Ufee1b5ba3cd1e84aaa5fe50ed7867262/t3pViD6vMKHNGr7YA23ML.jpg" alt="">
+              <img src="https://picsum.photos/id/29/1000/1000" alt="">
               <div class="d-brand"></div>
               <button class="cover-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>編集</button>
             </div>
@@ -165,7 +112,6 @@
           </div>
         </div>
       </div>
-    </div>
   </div>
 </div>
 <script>
